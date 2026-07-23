@@ -1,0 +1,6 @@
+{
+  "name": "LogiServicios Mónaco",
+  "description": "Servicios de transporte y logística en Guatemala - Cobertura nacional en los 22 departamentos",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
