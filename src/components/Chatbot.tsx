@@ -78,9 +78,9 @@ const FAQ: FaqItem[] = [
       "Aceptamos transferencia bancaria y depósito. Emitimos factura electrónica. Para clientes recurrentes manejamos crédito según evaluación.",
   },
   {
-    keywords: ["trabaja", "empleo", "trabajo", "piloto", "vacante", "aplicar", "reclutamiento"],
+    keywords: ["trabaja", "empleo", "trabajo", "piloto", "vacante", "aplicar", "reclutamiento", "rrhh", "cv"],
     answer:
-      "¡Nos encantaría conocerte! Ve a la sección 'Trabaja con nosotros' y envíanos tu CV con el puesto al que aplicas.",
+      "¡Nos encantaría conocerte! Ve a la sección 'Únete al equipo' para enviar tu CV o comunícate a recursoshumanos@logiserviciosmonaco.com o reclutamiento@grupo-sitsa.com.",
   },
   {
     keywords: ["dirección", "direccion", "ubicación", "ubicacion", "oficina"],

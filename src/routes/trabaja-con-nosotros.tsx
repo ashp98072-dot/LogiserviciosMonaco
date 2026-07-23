@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Send, Briefcase } from "lucide-react";
+import { Send, Briefcase, Mail } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
 
 export const Route = createFileRoute("/trabaja-con-nosotros")({
   head: () => ({
     meta: [
-      { title: "Trabaja con nosotros | Logiservicios Mónaco" },
+      { title: "Únete al equipo | Logiservicios Mónaco" },
       { name: "description", content: "Únete al equipo de Logiservicios Mónaco. Aplica como piloto, transportista o personal administrativo." },
-      { property: "og:title", content: "Trabaja con nosotros | Logiservicios Mónaco" },
+      { property: "og:title", content: "Únete al equipo | Logiservicios Mónaco" },
       { property: "og:description", content: "Postúlate y forma parte de nuestro equipo logístico en Guatemala." },
     ],
   }),
@@ -19,8 +19,8 @@ function Page() {
     <SiteLayout>
       <section className="bg-hero-gradient text-primary-foreground py-20">
         <div className="max-w-5xl mx-auto px-4">
-          <span className="text-gold font-semibold uppercase text-sm tracking-wider">Únete al equipo</span>
-          <h1 className="mt-2 text-4xl md:text-5xl font-bold">Trabaja con nosotros</h1>
+          <span className="text-gold font-semibold uppercase text-sm tracking-wider">Oportunidades laborales</span>
+          <h1 className="mt-2 text-4xl md:text-5xl font-bold">Únete al equipo</h1>
           <p className="mt-4 max-w-2xl text-primary-foreground/85">
             Buscamos pilotos, transportistas y personal comprometido con la excelencia. Envíanos tu información y nuestro equipo de reclutamiento te contactará.
           </p>
@@ -41,7 +41,7 @@ function Page() {
         <form
           action="https://formspree.io/f/xwvglayw"
           method="POST"
-          className="rounded-xl border border-border bg-card p-6 md:p-8 shadow-elegant space-y-4"
+          className="rounded-xl border border-border bg-card p-6 md:p-8 shadow-elegant space-y-5"
         >
           <div className="grid md:grid-cols-2 gap-4">
             <Field label="Nombre completo" name="nombre" required />
@@ -71,9 +71,34 @@ function Page() {
             </p>
           </div>
 
-          <button type="submit" className="inline-flex items-center gap-2 bg-gold-gradient text-gold-foreground rounded-md px-6 py-3 font-semibold hover:brightness-105 shadow-card">
-            Enviar aplicación <Send className="h-4 w-4" />
-          </button>
+          <div className="pt-3 pb-1 border-t border-border mt-4">
+            <p className="text-sm font-medium text-foreground flex items-center gap-2">
+              <Mail className="h-4 w-4 text-primary" />
+              O comunícate con nosotros por medio de correo electrónico:
+            </p>
+            <div className="mt-2.5 flex flex-wrap gap-2 md:gap-3 text-sm font-medium">
+              <a
+                href="mailto:recursoshumanos@logiserviciosmonaco.com"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-accent/60 text-primary hover:bg-accent hover:border-primary/30 transition"
+              >
+                <Mail className="h-3.5 w-3.5 text-gold" />
+                recursoshumanos@logiserviciosmonaco.com
+              </a>
+              <a
+                href="mailto:reclutamiento@grupo-sitsa.com"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-accent/60 text-primary hover:bg-accent hover:border-primary/30 transition"
+              >
+                <Mail className="h-3.5 w-3.5 text-gold" />
+                reclutamiento@grupo-sitsa.com
+              </a>
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <button type="submit" className="inline-flex items-center gap-2 bg-gold-gradient text-gold-foreground rounded-md px-6 py-3 font-semibold hover:brightness-105 shadow-card">
+              Enviar aplicación <Send className="h-4 w-4" />
+            </button>
+          </div>
         </form>
       </section>
     </SiteLayout>

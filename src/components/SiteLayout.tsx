@@ -10,7 +10,7 @@ const nav = [
   { to: "/mision", label: "Misión" },
   { to: "/vision", label: "Visión" },
   { to: "/cobertura", label: "Cobertura" },
-  { to: "/trabaja-con-nosotros", label: "Trabaja con nosotros" },
+  { to: "/trabaja-con-nosotros", label: "Únete al equipo" },
   { to: "/contacto", label: "Contacto" },
 ] as const;
 
