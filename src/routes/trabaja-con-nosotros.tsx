@@ -1,106 +1,400 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Send, Briefcase, Mail } from "lucide-react";
+import { Send, Briefcase, Mail, MapPin, Award, CheckCircle2, DollarSign, Calendar, MessageCircle, Eye, X, Sparkles } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
+
+import pilotoCabezalesFlyer from "@/assets/piloto cabezales.jpeg";
+import piloto5TonFlyer from "@/assets/piloto 5 ton.jpeg";
+import piloto10TonFlyer from "@/assets/Piloto 10 ton.jpeg";
 
 export const Route = createFileRoute("/trabaja-con-nosotros")({
   head: () => ({
     meta: [
-      { title: "Únete al equipo | Logiservicios Mónaco" },
-      { name: "description", content: "Únete al equipo de Logiservicios Mónaco. Aplica como piloto, transportista o personal administrativo." },
-      { property: "og:title", content: "Únete al equipo | Logiservicios Mónaco" },
-      { property: "og:description", content: "Postúlate y forma parte de nuestro equipo logístico en Guatemala." },
+      { title: "Únete al equipo y Plazas Disponibles | Logiservicios Mónaco" },
+      { name: "description", content: "Conoce nuestras plazas disponibles para pilotos de cabezales, 5TN y 10TN en Guatemala. Aplica directamente con nosotros." },
+      { property: "og:title", content: "Plazas Disponibles | Logiservicios Mónaco" },
+      { property: "og:description", content: "Postúlate como piloto de transporte pesado o distribución. Oportunidades laborales activas en Guatemala." },
     ],
   }),
   component: Page,
 });
 
+interface Vacancy {
+  id: string;
+  title: string;
+  location: string;
+  license: string;
+  salary: string;
+  flyerImage: string;
+  subjectEmail: string;
+  requirements: string[];
+  offers: string[];
+}
+
+const VACANCIES: Vacancy[] = [
+  {
+    id: "cabezales",
+    title: "Piloto de Cabezales",
+    location: "Ciudad de Guatemala, Zona 12 (Petapa)",
+    license: "Licencia Tipo A vigente",
+    salary: "Q8,000.00 / mes",
+    flyerImage: pilotoCabezalesFlyer,
+    subjectEmail: "Piloto cabezal",
+    requirements: [
+      "Hombre de 25 a 40 años",
+      "Licencia tipo A vigente",
+      "Ideal nivel diversificado",
+      "Experiencia mínima de 2 años comprobable",
+      "Responsable, trabajo en equipo, ética y comunicación",
+      "Residir en La Petapa, Ciudad de Guatemala o alrededores",
+    ],
+    offers: [
+      "Salario mensual de Q8,000.00",
+      "Estabilidad laboral",
+      "Viáticos",
+      "Prestaciones laborales completas",
+      "Horario de lunes a sábado",
+    ],
+  },
+  {
+    id: "5tn",
+    title: "Piloto 5TN",
+    location: "Ciudad de Guatemala, Zona 12 (Petapa)",
+    license: "Licencia Tipo B vigente",
+    salary: "Salario mensual atractivo",
+    flyerImage: piloto5TonFlyer,
+    subjectEmail: "Piloto 5Tn",
+    requirements: [
+      "Hombre de 25 a 40 años",
+      "Licencia tipo B vigente",
+      "Ideal nivel diversificado",
+      "Experiencia mínima de 2 años comprobable",
+      "Responsable, trabajo en equipo, ética y capacidad analítica",
+      "Residir en La Petapa, Ciudad de Guatemala o alrededores",
+    ],
+    offers: [
+      "Salario mensual competitivo",
+      "Estabilidad laboral",
+      "Viáticos",
+      "Prestaciones laborales completas",
+      "Horario de lunes a sábado",
+    ],
+  },
+  {
+    id: "10tn",
+    title: "Piloto 10TN",
+    location: "Ciudad de Guatemala, Zona 12",
+    license: "Licencia Tipo A vigente",
+    salary: "Salario mensual atractivo",
+    flyerImage: piloto10TonFlyer,
+    subjectEmail: "Piloto 10Tn",
+    requirements: [
+      "Hombre de 25 a 40 años",
+      "Licencia tipo A vigente",
+      "Ideal nivel diversificado",
+      "Experiencia mínima de 2 años comprobable",
+      "Responsable, trabajo en equipo, ética y capacidad analítica",
+      "Residir en Chimaltenango o alrededores",
+    ],
+    offers: [
+      "Salario mensual competitivo",
+      "Estabilidad laboral",
+      "Viáticos",
+      "Prestaciones laborales completas",
+      "Horario de lunes a sábado",
+    ],
+  },
+];
+
 function Page() {
+  const [selectedFlyer, setSelectedFlyer] = useState<Vacancy | null>(null);
+  const [selectedPosition, setSelectedPosition] = useState<string>("");
+
+  const handleSelectPosition = (title: string) => {
+    setSelectedPosition(title);
+    const formElement = document.getElementById("formulario-aplicacion");
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <SiteLayout>
-      <section className="bg-hero-gradient text-primary-foreground py-20">
-        <div className="max-w-5xl mx-auto px-4">
-          <span className="text-gold font-semibold uppercase text-sm tracking-wider">Oportunidades laborales</span>
-          <h1 className="mt-2 text-4xl md:text-5xl font-bold">Únete al equipo</h1>
-          <p className="mt-4 max-w-2xl text-primary-foreground/85">
-            Buscamos pilotos, transportistas y personal comprometido con la excelencia. Envíanos tu información y nuestro equipo de reclutamiento te contactará.
+      {/* Hero Header */}
+      <section className="bg-hero-gradient text-primary-foreground py-16 md:py-20">
+        <div className="max-w-5xl mx-auto px-4 text-center md:text-left">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/20 text-gold font-semibold uppercase text-xs tracking-wider border border-gold/30">
+            <Sparkles className="h-3.5 w-3.5" /> Oportunidades Laborales Activas
+          </span>
+          <h1 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight">Únete a Nuestro Equipo</h1>
+          <p className="mt-4 max-w-2xl text-primary-foreground/85 text-base md:text-lg">
+            Forma parte de la red logística líder en Guatemala. Buscamos pilotos profesionales de transporte pesado y distribución comprometidos con la excelencia.
           </p>
         </div>
       </section>
 
-      <section className="max-w-4xl mx-auto px-4 py-16">
+      {/* Active Job Vacancies (Plazas Disponibles) */}
+      <section className="max-w-6xl mx-auto px-4 py-16">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+          <div>
+            <span className="text-primary font-bold uppercase text-xs tracking-widest">Contratación Inmediata</span>
+            <h2 className="text-3xl font-extrabold text-foreground mt-1">Plazas Disponibles</h2>
+            <p className="text-muted-foreground mt-1">
+              Conoce los requisitos de nuestras plazas abiertas y postúlate directamente por WhatsApp, correo o nuestro formulario.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20 w-fit">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            Recibiendo solicitudes
+          </div>
+        </div>
+
+        {/* Job Cards Grid */}
+        <div className="grid md:grid-cols-3 gap-8">
+          {VACANCIES.map((vacancy) => (
+            <div
+              key={vacancy.id}
+              className="group rounded-2xl border border-border bg-card shadow-card hover:shadow-elegant transition-all duration-300 flex flex-col justify-between overflow-hidden"
+            >
+              <div>
+                {/* Header Banner & Image Thumbnail */}
+                <div className="relative bg-neutral-900 h-48 overflow-hidden group">
+                  <img
+                    src={vacancy.flyerImage}
+                    alt={`Afiche de ${vacancy.title}`}
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 opacity-90"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                  
+                  {/* Badge & Zoom Action */}
+                  <div className="absolute top-3 right-3 flex items-center gap-2">
+                    <button
+                      onClick={() => setSelectedFlyer(vacancy)}
+                      className="inline-flex items-center gap-1.5 bg-black/60 hover:bg-primary text-white text-xs font-medium px-2.5 py-1 rounded-lg backdrop-blur-md transition shadow-md"
+                      title="Ver afiche oficial"
+                    >
+                      <Eye className="h-3.5 w-3.5" /> Ver Afiche
+                    </button>
+                  </div>
+
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <span className="inline-block bg-primary text-primary-foreground font-bold text-[11px] px-2.5 py-0.5 rounded-md uppercase tracking-wider mb-1">
+                      Plaza Disponible
+                    </span>
+                    <h3 className="text-xl font-bold text-white drop-shadow-sm">{vacancy.title}</h3>
+                  </div>
+                </div>
+
+                {/* Key Details Pills */}
+                <div className="p-5 space-y-4">
+                  <div className="space-y-2 text-xs text-foreground/90">
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span><strong>Ubicación:</strong> {vacancy.location}</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Award className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                      <span><strong>Requisito:</strong> {vacancy.license}</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <span><strong>Ofrecemos:</strong> {vacancy.salary}</span>
+                    </div>
+                  </div>
+
+                  {/* Requisitos List */}
+                  <div className="border-t border-border pt-3">
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Requisitos Clave</h4>
+                    <ul className="space-y-1.5 text-xs text-muted-foreground">
+                      {vacancy.requirements.map((req, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                          <span>{req}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Beneficios List */}
+                  <div className="border-t border-border pt-3">
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Beneficios</h4>
+                    <ul className="space-y-1.5 text-xs text-muted-foreground">
+                      {vacancy.offers.map((off, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <Calendar className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                          <span>{off}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card Actions */}
+              <div className="p-5 pt-0 space-y-2">
+                <a
+                  href={`https://wa.me/50235867452?text=${encodeURIComponent(`Hola, quisiera más información y postularme para la plaza disponible de: ${vacancy.title}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2.5 px-4 rounded-lg transition shadow-sm"
+                >
+                  <MessageCircle className="h-4 w-4" /> Aplicar por WhatsApp (3586-7452)
+                </a>
+                
+                <button
+                  onClick={() => handleSelectPosition(vacancy.title)}
+                  className="w-full inline-flex items-center justify-center gap-2 bg-accent/80 hover:bg-accent text-accent-foreground font-semibold text-xs py-2 px-4 rounded-lg border border-border transition"
+                >
+                  Llenar Formulario Web
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Application Form Section */}
+      <section id="formulario-aplicacion" className="max-w-4xl mx-auto px-4 pb-20 pt-8">
         <div className="mb-8 flex items-center gap-3">
-          <div className="h-12 w-12 rounded-lg bg-gold-gradient text-gold-foreground flex items-center justify-center">
+          <div className="h-12 w-12 rounded-xl bg-gold-gradient text-gold-foreground flex items-center justify-center shadow-md">
             <Briefcase className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">Formulario de aplicación</h2>
-            <p className="text-sm text-muted-foreground">Completa tus datos y comparte el enlace a tu CV o portafolio.</p>
+            <h2 className="text-2xl font-bold">Formulario de Aplicación Directa</h2>
+            <p className="text-sm text-muted-foreground">Completa tus datos y nuestro equipo de reclutamiento te evaluará a la brevedad.</p>
           </div>
         </div>
 
         <form
           action="https://formspree.io/f/xwvglayw"
           method="POST"
-          className="rounded-xl border border-border bg-card p-6 md:p-8 shadow-elegant space-y-5"
+          className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-elegant space-y-5"
         >
           <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Nombre completo" name="nombre" required />
-            <Field label="Correo electrónico" name="correo" type="email" required />
-            <Field label="Teléfono de contacto" name="telefono" type="tel" required />
-            <Field label="Puesto al que aplica / Tipo de transporte" name="puesto" required placeholder="Ej: Piloto trailero, Auxiliar de bodega..." />
+            <Field label="Nombre completo" name="nombre" required placeholder="Ej: Juan Pérez" />
+            <Field label="Correo electrónico" name="correo" type="email" required placeholder="tu@correo.com" />
+            <Field label="Teléfono de contacto" name="telefono" type="tel" required placeholder="Ej: 5555-5555" />
+            
+            <div>
+              <label className="text-sm font-medium">Puesto o Plaza al que aplica</label>
+              <select
+                name="puesto"
+                value={selectedPosition}
+                onChange={(e) => setSelectedPosition(e.target.value)}
+                required
+                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">-- Selecciona una plaza --</option>
+                <option value="Piloto de Cabezales">Piloto de Cabezales (Licencia A)</option>
+                <option value="Piloto 5TN">Piloto 5TN (Licencia B)</option>
+                <option value="Piloto 10TN">Piloto 10TN (Licencia A)</option>
+                <option value="Otro puesto / Transporte">Otro puesto o transporte</option>
+              </select>
+            </div>
           </div>
 
           <div>
-            <label className="text-sm font-medium">Mensaje / Presentación</label>
+            <label className="text-sm font-medium">Mensaje / Presentación o Experiencia</label>
             <textarea
-              name="mensaje" rows={5} required
+              name="mensaje"
+              rows={4}
+              required
               className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="Cuéntanos sobre tu experiencia, licencias, disponibilidad..."
+              placeholder="Indica tu edad, tipo de licencia, años de experiencia conduciendo y disponibilidad..."
             />
           </div>
 
           <div>
             <label className="text-sm font-medium">Enlace a tu CV (opcional)</label>
             <input
-              type="url" name="enlace_cv"
+              type="url"
+              name="enlace_cv"
               placeholder="https://drive.google.com/..."
               className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
             <p className="mt-1 text-xs text-muted-foreground">
-              Si lo deseas, sube tu CV a Google Drive, Dropbox u OneDrive y pega aquí el enlace público. Verifica que el enlace tenga permiso de visualización.
+              Puedes adjuntar un enlace público de Google Drive, Dropbox u OneDrive con tu currículum vitae.
             </p>
           </div>
 
-          <div className="pt-3 pb-1 border-t border-border mt-4">
+          <div className="pt-4 border-t border-border mt-4">
             <p className="text-sm font-medium text-foreground flex items-center gap-2">
               <Mail className="h-4 w-4 text-primary" />
-              O comunícate con nosotros por medio de correo electrónico:
+              O también puedes enviar tu CV directamente por correo electrónico:
             </p>
-            <div className="mt-2.5 flex flex-wrap gap-2 md:gap-3 text-sm font-medium">
+            <div className="mt-3 flex flex-wrap gap-2 md:gap-3 text-xs md:text-sm font-medium">
               <a
-                href="mailto:recursoshumanos@logiserviciosmonaco.com"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-accent/60 text-primary hover:bg-accent hover:border-primary/30 transition"
-              >
-                <Mail className="h-3.5 w-3.5 text-gold" />
-                recursoshumanos@logiserviciosmonaco.com
-              </a>
-              <a
-                href="mailto:reclutamiento@grupo-sitsa.com"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-accent/60 text-primary hover:bg-accent hover:border-primary/30 transition"
+                href="mailto:reclutamiento@grupo-sitsa.com?subject=Aplicación%20de%20empleo"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-accent/60 text-primary hover:bg-accent hover:border-primary/30 transition"
               >
                 <Mail className="h-3.5 w-3.5 text-gold" />
                 reclutamiento@grupo-sitsa.com
+              </a>
+              <a
+                href="mailto:recursoshumanos@logiserviciosmonaco.com?subject=Aplicación%20de%20empleo"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-accent/60 text-primary hover:bg-accent hover:border-primary/30 transition"
+              >
+                <Mail className="h-3.5 w-3.5 text-gold" />
+                recursoshumanos@logiserviciosmonaco.com
               </a>
             </div>
           </div>
 
           <div className="pt-2">
-            <button type="submit" className="inline-flex items-center gap-2 bg-gold-gradient text-gold-foreground rounded-md px-6 py-3 font-semibold hover:brightness-105 shadow-card">
-              Enviar aplicación <Send className="h-4 w-4" />
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center gap-2 bg-gold-gradient text-gold-foreground rounded-lg px-6 py-3 font-semibold hover:brightness-105 shadow-card w-full md:w-auto"
+            >
+              Enviar mi Aplicación <Send className="h-4 w-4" />
             </button>
           </div>
         </form>
       </section>
+
+      {/* Modal Flyer Viewer */}
+      {selectedFlyer && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setSelectedFlyer(null)}
+        >
+          <div
+            className="relative max-w-2xl w-full bg-card rounded-2xl overflow-hidden shadow-2xl border border-border"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-muted/40">
+              <h3 className="font-bold text-sm text-foreground">Afiche Oficial - {selectedFlyer.title}</h3>
+              <button
+                onClick={() => setSelectedFlyer(null)}
+                className="p-1 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-2 bg-black flex items-center justify-center max-h-[80vh]">
+              <img
+                src={selectedFlyer.flyerImage}
+                alt={`Afiche de ${selectedFlyer.title}`}
+                className="max-h-[75vh] w-auto object-contain rounded"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <div className="p-4 bg-card border-t border-border flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs text-muted-foreground">
+                Envía tu CV a <strong>reclutamiento@grupo-sitsa.com</strong> con el asunto &quot;{selectedFlyer.subjectEmail}&quot;
+              </span>
+              <a
+                href={`https://wa.me/50235867452?text=${encodeURIComponent(`Hola, vi el afiche de ${selectedFlyer.title} y deseo postularme.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 bg-emerald-600 text-white font-semibold text-xs px-3 py-1.5 rounded-lg hover:bg-emerald-700 transition"
+              >
+                <MessageCircle className="h-3.5 w-3.5" /> WhatsApp 3586-7452
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </SiteLayout>
   );
 }
@@ -109,9 +403,12 @@ function Field({ label, ...props }: { label: string } & React.InputHTMLAttribute
   return (
     <div>
       <label className="text-sm font-medium">{label}</label>
-      <input {...props}
-        className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+      <input
+        {...props}
+        className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+      />
     </div>
   );
 }
+
 
