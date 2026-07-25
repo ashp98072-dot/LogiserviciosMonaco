@@ -125,8 +125,8 @@ function Home() {
             <Link to="/contacto" className="inline-flex items-center gap-2 bg-gold-gradient text-gold-foreground rounded-md px-6 py-3 font-semibold shadow-elegant hover:brightness-105 transition">
               Solicitar cotización <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link to="/quienes-somos" className="inline-flex items-center gap-2 border border-white/30 text-primary-foreground rounded-md px-6 py-3 font-semibold hover:bg-white/10 transition">
-              Conócenos
+            <Link to="/filosofia" className="inline-flex items-center gap-2 border border-white/30 text-primary-foreground rounded-md px-6 py-3 font-semibold hover:bg-white/10 transition">
+              Nuestra Filosofía
             </Link>
           </div>
           <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl">
@@ -375,8 +375,8 @@ function Home() {
             <p className="mt-4 text-muted-foreground">
               Logiservicios Mónaco nace para ofrecer un servicio logístico confiable, transparente y a la medida de cada cliente. Combinamos experiencia, tecnología y compromiso humano para entregar resultados que impulsan tu negocio.
             </p>
-            <Link to="/quienes-somos" className="mt-6 inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all">
-              Conoce más sobre nosotros <ArrowRight className="h-4 w-4" />
+            <Link to="/filosofia" className="mt-6 inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all">
+              Conoce más sobre nuestra filosofía empresarial <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
