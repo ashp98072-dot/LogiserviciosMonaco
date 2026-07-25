@@ -234,12 +234,12 @@ function Page() {
               {/* Card Actions */}
               <div className="p-5 pt-0 space-y-2">
                 <a
-                  href={`https://wa.me/50235867452?text=${encodeURIComponent(`Hola, quisiera más información y postularme para la plaza disponible de: ${vacancy.title}`)}`}
+                  href={`https://wa.me/50230137849?text=${encodeURIComponent(`Hola, quisiera más información y postularme para la plaza disponible de: ${vacancy.title}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2.5 px-4 rounded-lg transition shadow-sm"
                 >
-                  <MessageCircle className="h-4 w-4" /> Aplicar por WhatsApp (3586-7452)
+                  <MessageCircle className="h-4 w-4" /> Aplicar por WhatsApp (3013-7849)
                 </a>
                 
                 <button
