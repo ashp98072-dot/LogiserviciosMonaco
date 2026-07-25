@@ -3,9 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Send, Briefcase, Mail, MapPin, Award, CheckCircle2, DollarSign, Calendar, MessageCircle, Eye, X, Sparkles } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
 
-import pilotoCabezalesFlyer from "@/assets/piloto-cabezales.jpeg";
-import piloto5TonFlyer from "@/assets/piloto-5-ton.jpeg";
-import piloto10TonFlyer from "@/assets/piloto-10-ton.jpeg";
+import pilotoCabezalesFlyer from "@/assets/piloto cabezales.jpeg";
+import piloto5TonFlyer from "@/assets/piloto 5 ton.jpeg";
+import piloto10TonFlyer from "@/assets/piloto 10 ton.jpeg";
 
 export const Route = createFileRoute("/trabaja-con-nosotros")({
   head: () => ({

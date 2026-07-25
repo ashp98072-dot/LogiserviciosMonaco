@@ -7,11 +7,11 @@ import warehouse from "@/assets/warehouse.jpg";
 import logoMark from "@/assets/logo-mark.png";
 
 import cabezalImg from "@/assets/cabezales.png";
-import fuso5Img from "@/assets/unidades-de-5-ton.png";
-import fuso12Img from "@/assets/unidades-de-12-ton.png";
-import isuzu2Img from "@/assets/unidades-de-2-7-ton.png";
-import liteace1Img from "@/assets/panele-1-ton.png";
-import hiace15Img from "@/assets/panel-1-5-ton.png";
+import fuso5Img from "@/assets/Unidades de 5 Ton.png";
+import fuso12Img from "@/assets/Unidades de 12 Ton.png";
+import isuzu2Img from "@/assets/Unidades de 2.7 Ton.png";
+import liteace1Img from "@/assets/Panele 1 Ton .png";
+import hiace15Img from "@/assets/Panel 1.5 Ton.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
