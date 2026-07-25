@@ -14,6 +14,7 @@ import { Route as TrabajaConNosotrosRouteImport } from './routes/trabaja-con-nos
 import { Route as QuienesSomosRouteImport } from './routes/quienes-somos'
 import { Route as MisionRouteImport } from './routes/mision'
 import { Route as GraciasRouteImport } from './routes/gracias'
+import { Route as FilosofiaRouteImport } from './routes/filosofia'
 import { Route as ContactoRouteImport } from './routes/contacto'
 import { Route as CoberturaRouteImport } from './routes/cobertura'
 import { Route as IndexRouteImport } from './routes/index'
@@ -43,6 +44,11 @@ const GraciasRoute = GraciasRouteImport.update({
   path: '/gracias',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FilosofiaRoute = FilosofiaRouteImport.update({
+  id: '/filosofia',
+  path: '/filosofia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactoRoute = ContactoRouteImport.update({
   id: '/contacto',
   path: '/contacto',
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cobertura': typeof CoberturaRoute
   '/contacto': typeof ContactoRoute
+  '/filosofia': typeof FilosofiaRoute
   '/gracias': typeof GraciasRoute
   '/mision': typeof MisionRoute
   '/quienes-somos': typeof QuienesSomosRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cobertura': typeof CoberturaRoute
   '/contacto': typeof ContactoRoute
+  '/filosofia': typeof FilosofiaRoute
   '/gracias': typeof GraciasRoute
   '/mision': typeof MisionRoute
   '/quienes-somos': typeof QuienesSomosRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/cobertura': typeof CoberturaRoute
   '/contacto': typeof ContactoRoute
+  '/filosofia': typeof FilosofiaRoute
   '/gracias': typeof GraciasRoute
   '/mision': typeof MisionRoute
   '/quienes-somos': typeof QuienesSomosRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cobertura'
     | '/contacto'
+    | '/filosofia'
     | '/gracias'
     | '/mision'
     | '/quienes-somos'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cobertura'
     | '/contacto'
+    | '/filosofia'
     | '/gracias'
     | '/mision'
     | '/quienes-somos'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cobertura'
     | '/contacto'
+    | '/filosofia'
     | '/gracias'
     | '/mision'
     | '/quienes-somos'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CoberturaRoute: typeof CoberturaRoute
   ContactoRoute: typeof ContactoRoute
+  FilosofiaRoute: typeof FilosofiaRoute
   GraciasRoute: typeof GraciasRoute
   MisionRoute: typeof MisionRoute
   QuienesSomosRoute: typeof QuienesSomosRoute
@@ -171,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GraciasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/filosofia': {
+      id: '/filosofia'
+      path: '/filosofia'
+      fullPath: '/filosofia'
+      preLoaderRoute: typeof FilosofiaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contacto': {
       id: '/contacto'
       path: '/contacto'
@@ -199,6 +219,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CoberturaRoute: CoberturaRoute,
   ContactoRoute: ContactoRoute,
+  FilosofiaRoute: FilosofiaRoute,
   GraciasRoute: GraciasRoute,
   MisionRoute: MisionRoute,
   QuienesSomosRoute: QuienesSomosRoute,

@@ -7,6 +7,7 @@ import Chatbot from "./Chatbot";
 const nav = [
   { to: "/", label: "Inicio" },
   { to: "/quienes-somos", label: "Quiénes Somos" },
+  { to: "/filosofia", label: "Filosofía" },
   { to: "/mision", label: "Misión" },
   { to: "/vision", label: "Visión" },
   { to: "/cobertura", label: "Cobertura" },
