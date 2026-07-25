@@ -325,11 +325,11 @@ function Page() {
             </p>
             <div className="mt-3 flex flex-wrap gap-2 md:gap-3 text-xs md:text-sm font-medium">
               <a
-                href="mailto:reclutamiento@grupo-sitsa.com?subject=Aplicación%20de%20empleo"
+                href="mailto:recursoshumanos@logiserviciosmonaco.com?subject=Aplicación%20de%20empleo"
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-accent/60 text-primary hover:bg-accent hover:border-primary/30 transition"
               >
                 <Mail className="h-3.5 w-3.5 text-gold" />
-                reclutamiento@grupo-sitsa.com
+                recursoshumanos@logiserviciosmonaco.com
               </a>
               <a
                 href="mailto:recursoshumanos@logiserviciosmonaco.com?subject=Aplicación%20de%20empleo"
