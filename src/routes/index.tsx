@@ -7,11 +7,11 @@ import warehouse from "@/assets/warehouse.jpg";
 import logoMark from "@/assets/logo-mark.png";
 
 import cabezalImg from "@/assets/cabezales.png";
-import fuso5Img from "@/assets/Unidades de 5 Ton.png";
-import fuso12Img from "@/assets/Unidades de 12 Ton.png";
-import isuzu2Img from "@/assets/Unidades de 2.7 Ton.png";
-import liteace1Img from "@/assets/Panele 1 Ton.png";
-import hiace15Img from "@/assets/Panel 1.5 Ton.png";
+import fuso5Img from "@/assets/unidades-de-5-ton.png";
+import fuso12Img from "@/assets/unidades-de-12-ton.png";
+import isuzu2Img from "@/assets/unidades-de-2-7-ton.png";
+import liteace1Img from "@/assets/panele-1-ton.png";
+import hiace15Img from "@/assets/panel-1-5-ton.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -216,7 +216,7 @@ function Home() {
                   className="rounded-2xl border border-border bg-card overflow-hidden shadow-card hover:shadow-elegant transition-all duration-300 group flex flex-col"
                 >
                   {/* Image container */}
-                  <div className="relative h-56 bg-neutral-100 dark:bg-neutral-900 overflow-hidden flex items-center justify-center p-2">
+                  <div className="relative h-56 md:h-60 bg-white overflow-hidden flex items-center justify-center p-3 border-b border-border">
                     <img
                       src={truck.image}
                       alt={truck.name}
