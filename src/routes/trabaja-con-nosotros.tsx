@@ -381,7 +381,7 @@ function Page() {
             </div>
             <div className="p-4 bg-card border-t border-border flex flex-wrap items-center justify-between gap-2">
               <span className="text-xs text-muted-foreground">
-                Envía tu CV a <strong>reclutamiento@grupo-sitsa.com</strong> con el asunto &quot;{selectedFlyer.subjectEmail}&quot;
+                Envía tu CV a <strong>recursoshumanos@logiserviciosmonaco.com</strong> con el asunto &quot;{selectedFlyer.subjectEmail}&quot;
               </span>
               <a
                 href={`https://wa.me/50235867452?text=${encodeURIComponent(`Hola, vi el afiche de ${selectedFlyer.title} y deseo postularme.`)}`}
