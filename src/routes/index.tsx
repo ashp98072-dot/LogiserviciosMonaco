@@ -122,10 +122,10 @@ function Home() {
             En Logiservicios Mónaco convertimos la logística en tu ventaja competitiva. Cobertura a nivel nacional y un equipo comprometido con tu operación.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/contacto" className="inline-flex items-center gap-2 bg-gold-gradient text-gold-foreground rounded-md px-6 py-3 font-semibold shadow-elegant hover:brightness-105 transition">
+            <Link to="/contacto" className="inline-flex items-center gap-2 bg-white text-[#C00000] rounded-xl px-6 py-3 font-extrabold shadow-lg hover:bg-slate-100 transition">
               Solicitar cotización <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link to="/filosofia" className="inline-flex items-center gap-2 border border-white/30 text-primary-foreground rounded-md px-6 py-3 font-semibold hover:bg-white/10 transition">
+            <Link to="/filosofia" className="inline-flex items-center gap-2 border-2 border-white text-white rounded-xl px-6 py-3 font-bold hover:bg-white/10 transition">
               Nuestra Filosofía
             </Link>
           </div>
@@ -387,7 +387,7 @@ function Home() {
         <div className="rounded-2xl bg-hero-gradient text-primary-foreground p-10 md:p-14 shadow-elegant text-center">
           <h2 className="text-3xl md:text-4xl font-bold">¿Listo para optimizar tu logística?</h2>
           <p className="mt-3 text-primary-foreground/85 max-w-xl mx-auto">Contáctanos hoy y recibe una propuesta a la medida de tu operación.</p>
-          <Link to="/contacto" className="mt-6 inline-flex items-center gap-2 bg-gold-gradient text-gold-foreground rounded-md px-6 py-3 font-semibold hover:brightness-105">
+          <Link to="/contacto" className="mt-6 inline-flex items-center gap-2 bg-white text-[#C00000] rounded-xl px-6 py-3 font-extrabold shadow-lg hover:bg-slate-100 transition">
             Hablemos <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

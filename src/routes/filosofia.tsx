@@ -239,21 +239,21 @@ function Page() {
       {/* Call to action */}
       <section className="max-w-7xl mx-auto px-4 pb-20">
         <div className="rounded-3xl bg-hero-gradient text-primary-foreground p-10 md:p-14 shadow-elegant text-center flex flex-col items-center">
-          <HeartHandshake className="h-12 w-12 text-gold mb-3" />
+          <HeartHandshake className="h-12 w-12 text-white mb-3" />
           <h2 className="text-2xl md:text-4xl font-black uppercase">Forma parte de la experiencia Mónaco</h2>
-          <p className="mt-3 text-primary-foreground/85 max-w-xl text-sm md:text-base">
+          <p className="mt-3 text-primary-foreground/90 max-w-xl text-sm md:text-base font-medium">
             ¿Buscas un socio logístico guiado por la excelencia o deseas unirte a nuestro equipo?
           </p>
           <div className="mt-8 flex flex-wrap gap-4 justify-center">
             <Link
               to="/contacto"
-              className="inline-flex items-center gap-2 bg-gold-gradient text-gold-foreground rounded-xl px-6 py-3 font-semibold hover:brightness-105 transition shadow-card"
+              className="inline-flex items-center gap-2 bg-white text-[#C00000] rounded-xl px-6 py-3.5 font-extrabold hover:bg-slate-100 transition shadow-lg text-sm md:text-base"
             >
               Cotizar con Nosotros <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               to="/trabaja-con-nosotros"
-              className="inline-flex items-center gap-2 border border-white/30 text-primary-foreground rounded-xl px-6 py-3 font-semibold hover:bg-white/10 transition"
+              className="inline-flex items-center gap-2 border-2 border-white text-white rounded-xl px-6 py-3.5 font-bold hover:bg-white/15 transition text-sm md:text-base"
             >
               Ver Plazas Disponibles
             </Link>
