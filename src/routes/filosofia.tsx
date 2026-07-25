@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Target, Eye, Sparkles, ShieldCheck, HeartHandshake, Compass, Award, Palette, ArrowRight, CheckCircle2, RotateCcw, Truck, Users } from "lucide-react";
+import { Target, Eye, Sparkles, ShieldCheck, HeartHandshake, Compass, Award, ArrowRight, CheckCircle2, RotateCcw, Truck, Users } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
 
 export const Route = createFileRoute("/filosofia")({
@@ -14,14 +14,42 @@ export const Route = createFileRoute("/filosofia")({
   component: Page,
 });
 
-const IMPULSO_ITEMS = [
-  { letter: "I", topWord: "Innovación", bottomWord: null },
-  { letter: "M", topWord: null, bottomWord: "Mejora continua" },
-  { letter: "P", topWord: "Pasión", bottomWord: null },
-  { letter: "U", topWord: null, bottomWord: "Unidad" },
-  { letter: "L", topWord: "Liderazgo", bottomWord: null },
-  { letter: "S", topWord: null, bottomWord: "Servicio" },
-  { letter: "O", topWord: "Optimismo", bottomWord: null },
+const IMPULSO_CARDS = [
+  {
+    letter: "I",
+    title: "Innovación",
+    desc: "Búsqueda constante de nuevas tecnologías y mejoras en la ruta.",
+  },
+  {
+    letter: "M",
+    title: "Mejora continua",
+    desc: "Evolución constante en cada uno de nuestros procesos logísticos.",
+  },
+  {
+    letter: "P",
+    title: "Pasión",
+    desc: "Entrega total en cada envío y compromiso con el cliente.",
+  },
+  {
+    letter: "U",
+    title: "Unidad",
+    desc: "Trabajamos coordinados como un solo equipo sólido.",
+  },
+  {
+    letter: "L",
+    title: "Liderazgo",
+    desc: "Guiamos el sector con rigor, ética y altos estándares.",
+  },
+  {
+    letter: "S",
+    title: "Servicio",
+    desc: "Atención personalizada enfocada en superar expectativas.",
+  },
+  {
+    letter: "O",
+    title: "Optimismo",
+    desc: "Visión positiva y determinación para superar cualquier reto.",
+  },
 ];
 
 const PRINCIPIOS = [
@@ -31,45 +59,6 @@ const PRINCIPIOS = [
   { num: "04", text: "Actuamos con integridad." },
   { num: "05", text: "Cuidamos los recursos de la empresa." },
   { num: "06", text: "Representamos con orgullo Mónaco." },
-];
-
-const BRAND_COLORS = [
-  {
-    name: "Rojo Mónaco",
-    pantone: "Pantone #D60303",
-    hex: "#D60303",
-    bgStyle: { backgroundColor: "#D60303" },
-    textColor: "text-[#D60303]",
-    badgeClass: "bg-[#D60303] text-white",
-    meaning: "Representa la fuerza motriz que mantiene a nuestra flota en constante avance hacia el destino, genera pasión, orgullo de marca y proactividad en el talento humano.",
-  },
-  {
-    name: "Gris Claro",
-    pantone: "Pantone #ACA7A7",
-    hex: "#ACA7A7",
-    bgStyle: { backgroundColor: "#ACA7A7" },
-    textColor: "text-[#8C8787]",
-    badgeClass: "bg-[#ACA7A7] text-slate-900",
-    meaning: "Simboliza la capacidad de la organización para coordinar flujos de información y adaptarse a las demandas del mercado. Representa la armonía entre los departamentos, promoviendo una comunicación transparente y continua entre el centro de operaciones y la ruta.",
-  },
-  {
-    name: "Gris Oscuro",
-    pantone: "Pantone #4A4A4A",
-    hex: "#4A4A4A",
-    bgStyle: { backgroundColor: "#4A4A4A" },
-    textColor: "text-[#4A4A4A]",
-    badgeClass: "bg-[#4A4A4A] text-white",
-    meaning: "Refleja la seriedad institucional, el cumplimiento estricto de protocolos de seguridad y el rigor en la gestión de riesgos. Evoca la fortaleza del asfalto, el acero de las unidades y simboliza la resiliencia organizacional para mantener la continuidad del negocio ante cualquier entorno variable.",
-  },
-  {
-    name: "Blanco Mónaco",
-    pantone: "Pantone #FFFFFF",
-    hex: "#FFFFFF",
-    bgStyle: { backgroundColor: "#FFFFFF" },
-    textColor: "text-slate-800",
-    badgeClass: "bg-white text-slate-900 border border-slate-300",
-    meaning: "El Blanco en el ADN Mónaco no es solamente ausencia de color: representa la pureza y la honestidad en el servicio. Es el lienzo sobre el cual se escriben los procesos claros, la apertura al diálogo y el aprendizaje continuo.",
-  },
 ];
 
 function Page() {
@@ -149,80 +138,37 @@ function Page() {
       </section>
 
       {/* Acrónimo MÓNAC0: IMPULSO */}
-      <section className="bg-neutral-950 text-white py-16 md:py-24 border-y border-neutral-800">
+      <section className="bg-slate-50/80 dark:bg-neutral-900/40 py-16 md:py-24 border-y border-border">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <span className="text-[#D60303] font-black uppercase text-xs tracking-widest">Nuestra Filosofía de Trabajo</span>
-            <h2 className="text-3xl md:text-5xl font-black text-white mt-2 uppercase tracking-tight">
-              Acrónimo MÓNAC0
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="text-[#C00000] font-bold uppercase text-xs md:text-sm tracking-widest block mb-1">
+              NUESTRA FILOSOFÍA DE TRABAJO
+            </span>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
+              Acrónimo MÓNAC0: IMPULSO
             </h2>
-            <p className="text-neutral-400 mt-2 text-sm md:text-base">
-              El pilar conceptual que guía cada paso operacional de nuestro equipo.
+            <p className="text-slate-600 dark:text-slate-300 mt-3 text-sm md:text-base leading-relaxed">
+              Cada letra de la palabra <strong className="text-slate-900 dark:text-white font-bold">IMPULSO</strong> define el marco conceptual sobre el cual construimos nuestras operaciones diarias y guiamos a nuestro equipo.
             </p>
           </div>
 
-          {/* Visual Acronym Representation matching graphic slide */}
-          <div className="max-w-5xl mx-auto bg-neutral-900 rounded-3xl p-6 md:p-12 border border-neutral-800 shadow-2xl relative overflow-hidden">
-            {/* Top Words Row */}
-            <div className="grid grid-cols-7 text-center gap-1 md:gap-2 mb-4">
-              {IMPULSO_ITEMS.map((item, idx) => (
-                <div key={idx} className="h-12 flex flex-col items-center justify-end pb-1">
-                  {item.topWord && (
-                    <span className="text-[11px] md:text-sm font-bold text-white tracking-tight leading-tight">
-                      {item.topWord}
-                    </span>
-                  )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 md:gap-3.5">
+            {IMPULSO_CARDS.map((card) => (
+              <div
+                key={card.letter}
+                className="rounded-2xl border border-slate-200/90 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-5 md:p-6 text-center shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col items-center"
+              >
+                <div className="h-12 w-12 md:h-14 md:w-14 rounded-2xl bg-[#C00000] text-white flex items-center justify-center text-xl md:text-2xl font-black shadow-md mb-4 shrink-0">
+                  {card.letter}
                 </div>
-              ))}
-            </div>
-
-            {/* Red Connector Lines Top */}
-            <div className="grid grid-cols-7 text-center gap-1 md:gap-2 mb-1">
-              {IMPULSO_ITEMS.map((item, idx) => (
-                <div key={idx} className="flex flex-col items-center justify-center">
-                  {item.topWord ? (
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#D60303] shadow-[0_0_8px_#D60303]" />
-                  ) : <div className="h-1.5" />}
-                  {item.topWord && <div className="w-0.5 h-4 bg-[#D60303]" />}
-                </div>
-              ))}
-            </div>
-
-            {/* Red IMPULSO Bar */}
-            <div className="bg-[#D60303] text-white rounded-xl py-4 md:py-6 shadow-xl relative z-10">
-              <div className="grid grid-cols-7 text-center items-center font-black text-2xl sm:text-4xl md:text-6xl tracking-widest">
-                {IMPULSO_ITEMS.map((item) => (
-                  <span key={item.letter} className="drop-shadow-md">
-                    {item.letter}
-                  </span>
-                ))}
+                <h3 className="font-extrabold text-base md:text-lg text-slate-900 dark:text-white leading-tight mb-2">
+                  {card.title}
+                </h3>
+                <p className="text-[11px] md:text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-normal">
+                  {card.desc}
+                </p>
               </div>
-            </div>
-
-            {/* Red Connector Lines Bottom */}
-            <div className="grid grid-cols-7 text-center gap-1 md:gap-2 mt-1">
-              {IMPULSO_ITEMS.map((item, idx) => (
-                <div key={idx} className="flex flex-col items-center justify-center">
-                  {item.bottomWord && <div className="w-0.5 h-4 bg-[#D60303]" />}
-                  {item.bottomWord ? (
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#D60303] shadow-[0_0_8px_#D60303]" />
-                  ) : <div className="h-1.5" />}
-                </div>
-              ))}
-            </div>
-
-            {/* Bottom Words Row */}
-            <div className="grid grid-cols-7 text-center gap-1 md:gap-2 mt-2">
-              {IMPULSO_ITEMS.map((item, idx) => (
-                <div key={idx} className="h-12 flex flex-col items-center justify-start pt-1">
-                  {item.bottomWord && (
-                    <span className="text-[11px] md:text-sm font-bold text-white tracking-tight leading-tight">
-                      {item.bottomWord}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -287,50 +233,6 @@ function Page() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Código Visual de Nuestra Cultura */}
-      <section className="max-w-7xl mx-auto px-4 py-16 md:py-20">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <span className="text-[#D60303] font-black uppercase text-xs tracking-widest flex items-center justify-center gap-1.5">
-            <Palette className="h-4 w-4 text-[#D60303]" /> Identidad e Historia de Marca
-          </span>
-          <h2 className="text-3xl md:text-4xl font-black text-foreground mt-1 uppercase">Código Visual de Nuestra Cultura</h2>
-          <p className="text-sm md:text-base text-muted-foreground italic mt-3 max-w-2xl mx-auto">
-            &ldquo;Los colores de Mónaco no solo identifican nuestra flota; definen la fuerza, la precisión y la integridad con la que movemos el futuro de la logística.&rdquo;
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {BRAND_COLORS.map((color) => (
-            <div
-              key={color.name}
-              className="rounded-2xl border border-border bg-card p-6 shadow-card flex flex-col sm:flex-row gap-5 items-start transition hover:shadow-elegant"
-            >
-              {/* Color swatch */}
-              <div className="flex flex-col items-center shrink-0 w-full sm:w-28">
-                <div
-                  style={color.bgStyle}
-                  className="w-full h-20 sm:h-24 rounded-xl shadow-md flex items-center justify-center font-mono text-xs font-bold border border-black/10"
-                />
-                <span className="text-[11px] font-mono font-bold text-muted-foreground mt-2">{color.pantone}</span>
-              </div>
-
-              {/* Color info */}
-              <div className="space-y-2 flex-1">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-extrabold text-lg text-foreground">{color.name}</h3>
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${color.badgeClass}`}>
-                    {color.hex}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  {color.meaning}
-                </p>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 
