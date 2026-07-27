@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowRight, Truck, MapPin, ShieldCheck, Package, Snowflake, Users, Shield, Check, Layers } from "lucide-react";
+import { ArrowRight, Truck, MapPin, ShieldCheck, Package, Snowflake, Users, Shield, Check, Layers, Sparkles } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
 import hero from "@/assets/logo_1.png";
 import warehouse from "@/assets/warehouse.jpg";
 import logoMark from "@/assets/logo-mark.png";
+import { useSiteData } from "@/context/SiteDataContext";
 
 import cabezalImg from "@/assets/cabezales.png";
 import fuso5Img from "@/assets/Unidades de 5 Ton.png";
@@ -95,7 +96,12 @@ const TRUCK_CATALOG = [
 ];
 
 function Home() {
+  const { siteData } = useSiteData();
   const [activeTab, setActiveTab] = useState<"catalog" | "specs">("catalog");
+
+  const heroImage = siteData.branding?.heroBgUrl || hero;
+  const warehouseImage = siteData.branding?.warehouseBgUrl || warehouse;
+  const activeSections = (siteData.customSections || []).filter((s) => s.active !== false);
 
   return (
     <SiteLayout>
@@ -103,23 +109,23 @@ function Home() {
       <section className="relative overflow-hidden bg-neutral-900 min-h-[600px] md:min-h-[700px]">
         <div className="absolute inset-0">
           <img
-            src={hero}
-            alt="Camión de Logiservicios Mónaco en carretera de Guatemala con volcán al amanecer"
+            src={heroImage}
+            alt="Logiservicios Mónaco"
             className="h-full w-full object-cover object-center"
             width={1792}
             height={1024}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 py-24 md:py-36 text-primary-foreground">
           <span className="inline-block px-3 py-1 rounded-full bg-gold text-gold-foreground text-xs font-semibold tracking-wide uppercase">
             Logística Guatemala
           </span>
           <h1 className="mt-4 text-4xl md:text-6xl font-bold max-w-3xl leading-tight">
-            Movemos tu carga por toda <span className="text-gold">Guatemala</span>.
+            {siteData.generalInfo?.heroTitle || "Movemos tu carga por toda Guatemala."}
           </h1>
           <p className="mt-5 max-w-xl text-lg text-primary-foreground/90">
-            En Logiservicios Mónaco convertimos la logística en tu ventaja competitiva. Cobertura a nivel nacional y un equipo comprometido con tu operación.
+            {siteData.generalInfo?.heroSubtitle || "En Logiservicios Mónaco convertimos la logística en tu ventaja competitiva."}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/contacto" className="inline-flex items-center gap-2 bg-white text-[#C00000] rounded-xl px-6 py-3 font-extrabold shadow-lg hover:bg-slate-100 transition">
@@ -368,7 +374,7 @@ function Home() {
       {/* Sobre la empresa */}
       <section className="bg-muted/40 py-20">
         <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
-          <img src={warehouse} alt="Bodega y operación logística" className="rounded-xl shadow-elegant w-full h-auto" width={1200} height={800} loading="lazy" />
+          <img src={warehouseImage} alt="Bodega y operación logística" className="rounded-xl shadow-elegant w-full h-auto object-cover max-h-[450px]" width={1200} height={800} loading="lazy" />
           <div>
             <span className="text-gold font-semibold uppercase text-sm tracking-wider">La empresa</span>
             <h2 className="mt-2 text-3xl md:text-4xl font-bold">Guatemaltecos moviendo a Guatemala</h2>
@@ -381,6 +387,193 @@ function Home() {
           </div>
         </div>
       </section>
+
+      {/* Secciones Dinámicas / Personalizables */}
+      {activeSections.length > 0 && (
+        <div className="space-y-0">
+          {activeSections.map((sec) => {
+            const isDark = sec.bgStyle === "dark";
+            const isGold = sec.bgStyle === "gold";
+
+            const bgClass = isDark
+              ? "bg-neutral-900 text-white py-20"
+              : isGold
+              ? "bg-hero-gradient text-white py-20"
+              : "bg-background py-20 border-t border-border";
+
+            if (sec.layoutStyle === "banner") {
+              return (
+                <section key={sec.id} className={`${bgClass} relative overflow-hidden`}>
+                  {sec.imageUrl && (
+                    <div className="absolute inset-0 opacity-20">
+                      <img src={sec.imageUrl} alt={sec.title} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div className="relative max-w-5xl mx-auto px-4 text-center">
+                    {sec.subtitle && (
+                      <span className="inline-block px-3 py-1 rounded-full bg-gold/20 text-gold text-xs font-semibold uppercase tracking-wider mb-3">
+                        {sec.subtitle}
+                      </span>
+                    )}
+                    <h2 className="text-3xl md:text-5xl font-bold">{sec.title}</h2>
+                    <p className="mt-4 text-lg opacity-90 max-w-2xl mx-auto whitespace-pre-line">{sec.content}</p>
+                    {sec.buttonText && sec.buttonUrl && (
+                      <div className="mt-8">
+                        {sec.buttonUrl.startsWith("http") ? (
+                          <a
+                            href={sec.buttonUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 bg-gold-gradient text-gold-foreground font-bold px-6 py-3 rounded-xl shadow-md hover:brightness-105 transition"
+                          >
+                            {sec.buttonText} <ArrowRight className="h-4 w-4" />
+                          </a>
+                        ) : (
+                          <Link
+                            to={sec.buttonUrl}
+                            className="inline-flex items-center gap-2 bg-gold-gradient text-gold-foreground font-bold px-6 py-3 rounded-xl shadow-md hover:brightness-105 transition"
+                          >
+                            {sec.buttonText} <ArrowRight className="h-4 w-4" />
+                          </Link>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </section>
+              );
+            }
+
+            if (sec.layoutStyle === "text-right") {
+              return (
+                <section key={sec.id} className={bgClass}>
+                  <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
+                    {sec.imageUrl ? (
+                      <img src={sec.imageUrl} alt={sec.title} className="rounded-xl shadow-elegant w-full h-auto object-cover max-h-[450px]" />
+                    ) : (
+                      <div className="h-64 rounded-xl bg-accent flex items-center justify-center p-6 text-center text-muted-foreground">
+                        <Sparkles className="h-12 w-12 text-gold opacity-60" />
+                      </div>
+                    )}
+                    <div>
+                      {sec.subtitle && (
+                        <span className="text-gold font-semibold uppercase text-sm tracking-wider">{sec.subtitle}</span>
+                      )}
+                      <h2 className="mt-2 text-3xl md:text-4xl font-bold">{sec.title}</h2>
+                      <p className="mt-4 opacity-85 leading-relaxed whitespace-pre-line">{sec.content}</p>
+                      {sec.buttonText && sec.buttonUrl && (
+                        <div className="mt-6">
+                          {sec.buttonUrl.startsWith("http") ? (
+                            <a
+                              href={sec.buttonUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all"
+                            >
+                              {sec.buttonText} <ArrowRight className="h-4 w-4" />
+                            </a>
+                          ) : (
+                            <Link
+                              to={sec.buttonUrl}
+                              className="inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all"
+                            >
+                              {sec.buttonText} <ArrowRight className="h-4 w-4" />
+                            </Link>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </section>
+              );
+            }
+
+            if (sec.layoutStyle === "card") {
+              return (
+                <section key={sec.id} className={bgClass}>
+                  <div className="max-w-5xl mx-auto px-4">
+                    <div className="rounded-2xl border border-border bg-card p-8 md:p-12 shadow-elegant">
+                      {sec.subtitle && (
+                        <span className="text-gold font-semibold uppercase text-xs tracking-wider">{sec.subtitle}</span>
+                      )}
+                      <h2 className="mt-1 text-2xl md:text-4xl font-bold text-foreground">{sec.title}</h2>
+                      <p className="mt-4 text-muted-foreground whitespace-pre-line">{sec.content}</p>
+                      {sec.imageUrl && (
+                        <div className="mt-6 rounded-xl overflow-hidden max-h-[350px]">
+                          <img src={sec.imageUrl} alt={sec.title} className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      {sec.buttonText && sec.buttonUrl && (
+                        <div className="mt-6">
+                          {sec.buttonUrl.startsWith("http") ? (
+                            <a
+                              href={sec.buttonUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-5 py-2.5 rounded-lg hover:bg-primary/90 transition"
+                            >
+                              {sec.buttonText} <ArrowRight className="h-4 w-4" />
+                            </a>
+                          ) : (
+                            <Link
+                              to={sec.buttonUrl}
+                              className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-5 py-2.5 rounded-lg hover:bg-primary/90 transition"
+                            >
+                              {sec.buttonText} <ArrowRight className="h-4 w-4" />
+                            </Link>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </section>
+              );
+            }
+
+            // Default: text-left
+            return (
+              <section key={sec.id} className={bgClass}>
+                <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
+                  <div>
+                    {sec.subtitle && (
+                      <span className="text-gold font-semibold uppercase text-sm tracking-wider">{sec.subtitle}</span>
+                    )}
+                    <h2 className="mt-2 text-3xl md:text-4xl font-bold">{sec.title}</h2>
+                    <p className="mt-4 opacity-85 leading-relaxed whitespace-pre-line">{sec.content}</p>
+                    {sec.buttonText && sec.buttonUrl && (
+                      <div className="mt-6">
+                        {sec.buttonUrl.startsWith("http") ? (
+                          <a
+                            href={sec.buttonUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all"
+                          >
+                            {sec.buttonText} <ArrowRight className="h-4 w-4" />
+                          </a>
+                        ) : (
+                          <Link
+                            to={sec.buttonUrl}
+                            className="inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all"
+                          >
+                            {sec.buttonText} <ArrowRight className="h-4 w-4" />
+                          </Link>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {sec.imageUrl ? (
+                    <img src={sec.imageUrl} alt={sec.title} className="rounded-xl shadow-elegant w-full h-auto object-cover max-h-[450px]" />
+                  ) : (
+                    <div className="h-64 rounded-xl bg-accent flex items-center justify-center p-6 text-center text-muted-foreground">
+                      <Sparkles className="h-12 w-12 text-gold opacity-60" />
+                    </div>
+                  )}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+      )}
 
       {/* CTA */}
       <section className="max-w-7xl mx-auto px-4 py-20">

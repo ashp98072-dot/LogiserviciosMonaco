@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Phone, Mail, MapPin, Send, MessageCircle } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
+import { useSiteData } from "@/context/SiteDataContext";
 
 export const Route = createFileRoute("/contacto")({
   head: () => ({
@@ -15,6 +16,9 @@ export const Route = createFileRoute("/contacto")({
 });
 
 function Page() {
+  const { siteData } = useSiteData();
+  const contact = siteData.contactInfo;
+
   return (
     <SiteLayout>
       <section className="bg-hero-gradient text-primary-foreground py-20">
@@ -30,9 +34,9 @@ function Page() {
       <section className="max-w-7xl mx-auto px-4 py-16 grid md:grid-cols-3 gap-8">
         <div className="md:col-span-1 space-y-4">
           {[
-            { i: Phone, t: "Teléfono", v: "+502 4017-5893" },
-            { i: Mail, t: "Correo", v: "info@logiserviciosmonaco.com" },
-            { i: MapPin, t: "Dirección", v: "17av. 45-35 avenida petapa zona 12 Ciudad de Guatemala, Guatemala" },
+            { i: Phone, t: "Teléfono", v: contact.phone },
+            { i: Mail, t: "Correo", v: contact.emailInfo },
+            { i: MapPin, t: "Dirección", v: contact.address },
             { i: MessageCircle, t: "Chat en línea", v: "Usa Mónaco Bot ↘" },
           ].map(({ i: Icon, t, v }) => (
             <div key={t} className="rounded-xl bg-card border border-border p-5 shadow-card flex gap-3">
@@ -41,7 +45,7 @@ function Page() {
               </div>
               <div>
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">{t}</div>
-                <div className="font-medium">{v}</div>
+                <div className="font-medium text-sm">{v}</div>
               </div>
             </div>
           ))}

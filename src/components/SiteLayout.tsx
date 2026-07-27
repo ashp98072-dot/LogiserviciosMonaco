@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { Menu, X, Phone, Mail, MapPin, Truck, Facebook, MessageCircle } from "lucide-react";
+import { Menu, X, Phone, Mail, MapPin, Truck, Facebook, MessageCircle, Lock } from "lucide-react";
 import logo from "@/assets/logo.png";
 import Chatbot from "./Chatbot";
+import { useSiteData } from "@/context/SiteDataContext";
 
 const nav = [
   { to: "/", label: "Inicio" },
@@ -12,18 +13,22 @@ const nav = [
   { to: "/contacto", label: "Contacto" },
 ] as const;
 
-const FACEBOOK_URL = "https://www.facebook.com/share/1CirGxQ8no/";
-const WHATSAPP_URL = "https://wa.me/50240175893";
-
 export default function SiteLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const { siteData } = useSiteData();
+  const contact = siteData.contactInfo;
+  const siteLogo = siteData.branding?.logoUrl || logo;
+
+  const facebookUrl = contact.facebookUrl || "https://www.facebook.com/share/1CirGxQ8no/";
+  const whatsappUrl = `https://wa.me/${contact.whatsappMain || "50240175893"}`;
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <header className="sticky top-0 z-40 backdrop-blur bg-background/85 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 h-24 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 shadow-card ring-1 ring-border" aria-label="Logiservicios Mónaco - Inicio">
             <img
-              src={logo}
+              src={siteLogo}
               alt="Logiservicios Mónaco"
               className="h-16 md:h-20 w-auto object-contain"
             />
@@ -40,7 +45,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
               </Link>
             ))}
             <a
-              href={FACEBOOK_URL}
+              href={facebookUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Facebook"
@@ -69,9 +74,12 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
                   {n.label}
                 </Link>
               ))}
-              <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-accent flex items-center gap-2">
+              <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-accent flex items-center gap-2">
                 <Facebook className="h-4 w-4" /> Facebook
               </a>
+              <Link to="/admin" onClick={() => setOpen(false)} className="px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-accent flex items-center gap-2">
+                <Lock className="h-4 w-4" /> Panel Admin CMS
+              </Link>
             </div>
           </div>
         )}
@@ -83,17 +91,17 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
         <div className="max-w-7xl mx-auto px-4 py-12 grid gap-8 md:grid-cols-4">
           <div>
             <div className="mb-3 inline-flex bg-white rounded-md p-2">
-              <img src={logo} alt="Logiservicios Mónaco" className="h-9 w-auto object-contain" />
+              <img src={siteLogo} alt="Logiservicios Mónaco" className="h-9 w-auto object-contain" />
             </div>
             <p className="text-sm text-primary-foreground/70">
               Soluciones integrales de logística y transporte en toda Guatemala.
             </p>
             <div className="mt-4 flex items-center gap-2">
-              <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+              <a href={facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook"
                 className="h-9 w-9 rounded-full bg-white/10 hover:bg-gold hover:text-gold-foreground flex items-center justify-center transition">
                 <Facebook className="h-4 w-4" />
               </a>
-              <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"
                 className="h-9 w-9 rounded-full bg-white/10 hover:bg-gold hover:text-gold-foreground flex items-center justify-center transition">
                 <MessageCircle className="h-4 w-4" />
               </a>
@@ -105,6 +113,11 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
               {nav.map((n) => (
                 <li key={n.to}><Link to={n.to} className="hover:text-gold">{n.label}</Link></li>
               ))}
+              <li>
+                <Link to="/admin" className="hover:text-gold text-primary-foreground/50 inline-flex items-center gap-1 text-xs mt-2">
+                  <Lock className="h-3 w-3" /> Panel Admin (CMS)
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
@@ -119,21 +132,23 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
           <div>
             <h4 className="font-semibold mb-3 text-gold">Contacto</h4>
             <ul className="space-y-2 text-sm text-primary-foreground/80">
-              <li className="flex items-start gap-2"><MapPin className="h-4 w-4 mt-0.5 text-gold" /> 17av. 45-35 avenida petapa zona 12 Ciudad de Guatemala, Guatemala
-</li>
-              <li className="flex items-center gap-2"><Phone className="h-4 w-4 text-gold" /> +502 4017-5893</li>
-              <li className="flex items-center gap-2"><Mail className="h-4 w-4 text-gold" /> info@logiserviciosmonaco.com</li>
+              <li className="flex items-start gap-2"><MapPin className="h-4 w-4 mt-0.5 text-gold" /> {contact.address}</li>
+              <li className="flex items-center gap-2"><Phone className="h-4 w-4 text-gold" /> {contact.phone}</li>
+              <li className="flex items-center gap-2"><Mail className="h-4 w-4 text-gold" /> {contact.emailInfo}</li>
             </ul>
           </div>
         </div>
-        <div className="border-t border-white/10 py-4 text-center text-xs text-primary-foreground/60">
-          © {new Date().getFullYear()} Logiservicios Mónaco. Todos los derechos reservados.
+        <div className="border-t border-white/10 py-4 text-center text-xs text-primary-foreground/60 flex flex-wrap items-center justify-between max-w-7xl mx-auto px-4 gap-2">
+          <span>© {new Date().getFullYear()} Logiservicios Mónaco. Todos los derechos reservados.</span>
+          <Link to="/admin" className="text-primary-foreground/40 hover:text-gold transition">
+            Administrar Sitio
+          </Link>
         </div>
       </footer>
 
       {/* Floating WhatsApp button */}
       <a
-        href={WHATSAPP_URL}
+        href={whatsappUrl}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chatear por WhatsApp"

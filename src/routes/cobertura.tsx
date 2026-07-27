@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { MapPin } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
 import mapImg from "@/assets/guatemala-map.jpg";
+import { useSiteData } from "@/context/SiteDataContext";
 
 const DEPARTAMENTOS = [
   "Guatemala", "Sacatepéquez", "Chimaltenango", "Escuintla",
@@ -25,6 +26,9 @@ export const Route = createFileRoute("/cobertura")({
 });
 
 function Page() {
+  const { siteData } = useSiteData();
+  const mapImage = siteData.branding?.coberturaMapUrl || mapImg;
+
   return (
     <SiteLayout>
       <section className="bg-hero-gradient text-primary-foreground py-20">
@@ -38,7 +42,7 @@ function Page() {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 py-16 grid md:grid-cols-2 gap-10 items-center">
-        <img src={mapImg} alt="Mapa de Guatemala con rutas de Logiservicios Mónaco" className="rounded-xl shadow-elegant w-full" width={1200} height={900} loading="lazy" />
+        <img src={mapImage} alt="Mapa de Guatemala con rutas de Logiservicios Mónaco" className="rounded-xl shadow-elegant w-full" width={1200} height={900} loading="lazy" />
         <div>
           <h2 className="text-3xl font-bold">Departamentos que atendemos</h2>
           <p className="mt-3 text-muted-foreground">Servicio de transporte y distribución en todas las regiones del país.</p>

@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as VisionRouteImport } from './routes/vision'
 import { Route as TrabajaConNosotrosRouteImport } from './routes/trabaja-con-nosotros'
 import { Route as QuienesSomosRouteImport } from './routes/quienes-somos'
@@ -19,6 +20,11 @@ import { Route as ContactoRouteImport } from './routes/contacto'
 import { Route as CoberturaRouteImport } from './routes/cobertura'
 import { Route as IndexRouteImport } from './routes/index'
 
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VisionRoute = VisionRouteImport.update({
   id: '/vision',
   path: '/vision',
@@ -67,6 +73,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/cobertura': typeof CoberturaRoute
   '/contacto': typeof ContactoRoute
   '/filosofia': typeof FilosofiaRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/cobertura': typeof CoberturaRoute
   '/contacto': typeof ContactoRoute
   '/filosofia': typeof FilosofiaRoute
@@ -90,6 +98,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/cobertura': typeof CoberturaRoute
   '/contacto': typeof ContactoRoute
   '/filosofia': typeof FilosofiaRoute
@@ -103,6 +112,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/cobertura'
     | '/contacto'
     | '/filosofia'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/cobertura'
     | '/contacto'
     | '/filosofia'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/cobertura'
     | '/contacto'
     | '/filosofia'
@@ -137,6 +149,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   CoberturaRoute: typeof CoberturaRoute
   ContactoRoute: typeof ContactoRoute
   FilosofiaRoute: typeof FilosofiaRoute
@@ -149,6 +162,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vision': {
       id: '/vision'
       path: '/vision'
@@ -217,6 +237,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   CoberturaRoute: CoberturaRoute,
   ContactoRoute: ContactoRoute,
   FilosofiaRoute: FilosofiaRoute,

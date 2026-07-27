@@ -2,10 +2,7 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Send, Briefcase, Mail, MapPin, Award, CheckCircle2, DollarSign, Calendar, MessageCircle, Eye, X, Sparkles } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
-
-import pilotoCabezalesFlyer from "@/assets/piloto cabezales.jpeg";
-import piloto5TonFlyer from "@/assets/piloto 5 ton.jpeg";
-import piloto10TonFlyer from "@/assets/piloto 10 ton.jpeg";
+import { useSiteData, Vacancy } from "@/context/SiteDataContext";
 
 export const Route = createFileRoute("/trabaja-con-nosotros")({
   head: () => ({
@@ -19,94 +16,11 @@ export const Route = createFileRoute("/trabaja-con-nosotros")({
   component: Page,
 });
 
-interface Vacancy {
-  id: string;
-  title: string;
-  location: string;
-  license: string;
-  salary: string;
-  flyerImage: string;
-  subjectEmail: string;
-  requirements: string[];
-  offers: string[];
-}
-
-const VACANCIES: Vacancy[] = [
-  {
-    id: "cabezales",
-    title: "Piloto de Cabezales",
-    location: "Ciudad de Guatemala, Zona 12 (Petapa)",
-    license: "Licencia Tipo A vigente",
-    salary: "Q8,000.00 / mes",
-    flyerImage: pilotoCabezalesFlyer,
-    subjectEmail: "Piloto cabezal",
-    requirements: [
-      "Hombre de 25 a 40 años",
-      "Licencia tipo A vigente",
-      "Ideal nivel diversificado",
-      "Experiencia mínima de 2 años comprobable",
-      "Responsable, trabajo en equipo, ética y comunicación",
-      "Residir en La Petapa, Ciudad de Guatemala o alrededores",
-    ],
-    offers: [
-      "Salario mensual de Q8,000.00",
-      "Estabilidad laboral",
-      "Viáticos",
-      "Prestaciones laborales completas",
-      "Horario de lunes a sábado",
-    ],
-  },
-  {
-    id: "5tn",
-    title: "Piloto 5TN",
-    location: "Ciudad de Guatemala, Zona 12 (Petapa)",
-    license: "Licencia Tipo B vigente",
-    salary: "Salario mensual atractivo",
-    flyerImage: piloto5TonFlyer,
-    subjectEmail: "Piloto 5Tn",
-    requirements: [
-      "Hombre de 25 a 40 años",
-      "Licencia tipo B vigente",
-      "Ideal nivel diversificado",
-      "Experiencia mínima de 2 años comprobable",
-      "Responsable, trabajo en equipo, ética y capacidad analítica",
-      "Residir en La Petapa, Ciudad de Guatemala o alrededores",
-    ],
-    offers: [
-      "Salario mensual competitivo",
-      "Estabilidad laboral",
-      "Viáticos",
-      "Prestaciones laborales completas",
-      "Horario de lunes a sábado",
-    ],
-  },
-  {
-    id: "10tn",
-    title: "Piloto 10TN",
-    location: "Ciudad de Guatemala, Zona 12",
-    license: "Licencia Tipo A vigente",
-    salary: "Salario mensual atractivo",
-    flyerImage: piloto10TonFlyer,
-    subjectEmail: "Piloto 10Tn",
-    requirements: [
-      "Hombre de 25 a 40 años",
-      "Licencia tipo A vigente",
-      "Ideal nivel diversificado",
-      "Experiencia mínima de 2 años comprobable",
-      "Responsable, trabajo en equipo, ética y capacidad analítica",
-      "Residir en Chimaltenango o alrededores",
-    ],
-    offers: [
-      "Salario mensual competitivo",
-      "Estabilidad laboral",
-      "Viáticos",
-      "Prestaciones laborales completas",
-      "Horario de lunes a sábado",
-    ],
-  },
-];
-
 function Page() {
+  const { siteData } = useSiteData();
+  const vacancies = siteData.vacancies.filter((v) => v.active !== false);
+  const contact = siteData.contactInfo;
+
   const [selectedFlyer, setSelectedFlyer] = useState<Vacancy | null>(null);
   const [selectedPosition, setSelectedPosition] = useState<string>("");
 
@@ -151,106 +65,117 @@ function Page() {
 
         {/* Job Cards Grid */}
         <div className="grid md:grid-cols-3 gap-8">
-          {VACANCIES.map((vacancy) => (
-            <div
-              key={vacancy.id}
-              className="group rounded-2xl border border-border bg-card shadow-card hover:shadow-elegant transition-all duration-300 flex flex-col justify-between overflow-hidden"
-            >
-              <div>
-                {/* Header Banner & Image Thumbnail */}
-                <div className="relative bg-neutral-900 h-48 overflow-hidden group">
-                  <img
-                    src={vacancy.flyerImage}
-                    alt={`Afiche de ${vacancy.title}`}
-                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 opacity-90"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          {vacancies.map((vacancy) => {
+            const waNumber = vacancy.whatsappNumber || contact.whatsappRRHH || "50230137849";
+            return (
+              <div
+                key={vacancy.id}
+                className="group rounded-2xl border border-border bg-card shadow-card hover:shadow-elegant transition-all duration-300 flex flex-col justify-between overflow-hidden"
+              >
+                <div>
+                  {/* Header Banner & Image Thumbnail */}
+                  <div className="relative bg-neutral-900 h-48 overflow-hidden group">
+                    {vacancy.flyerImage ? (
+                      <img
+                        src={vacancy.flyerImage}
+                        alt={`Afiche de ${vacancy.title}`}
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 opacity-90"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-primary to-neutral-800 flex items-center justify-center p-4 text-center text-white">
+                        <Briefcase className="h-12 w-12 text-gold opacity-80" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    
+                    {/* Badge & Zoom Action */}
+                    <div className="absolute top-3 right-3 flex items-center gap-2">
+                      {vacancy.flyerImage && (
+                        <button
+                          onClick={() => setSelectedFlyer(vacancy)}
+                          className="inline-flex items-center gap-1.5 bg-black/60 hover:bg-primary text-white text-xs font-medium px-2.5 py-1 rounded-lg backdrop-blur-md transition shadow-md"
+                          title="Ver afiche oficial"
+                        >
+                          <Eye className="h-3.5 w-3.5" /> Ver Afiche
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="absolute bottom-3 left-3 right-3">
+                      <span className="inline-block bg-primary text-primary-foreground font-bold text-[11px] px-2.5 py-0.5 rounded-md uppercase tracking-wider mb-1">
+                        Plaza Disponible
+                      </span>
+                      <h3 className="text-xl font-bold text-white drop-shadow-sm">{vacancy.title}</h3>
+                    </div>
+                  </div>
+
+                  {/* Key Details Pills */}
+                  <div className="p-5 space-y-4">
+                    <div className="space-y-2 text-xs text-foreground/90">
+                      <div className="flex items-start gap-2">
+                        <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <span><strong>Ubicación:</strong> {vacancy.location}</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <Award className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                        <span><strong>Requisito:</strong> {vacancy.license}</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                        <span><strong>Ofrecemos:</strong> {vacancy.salary}</span>
+                      </div>
+                    </div>
+
+                    {/* Requisitos List */}
+                    <div className="border-t border-border pt-3">
+                      <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Requisitos Clave</h4>
+                      <ul className="space-y-1.5 text-xs text-muted-foreground">
+                        {vacancy.requirements.map((req, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                            <span>{req}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Beneficios List */}
+                    <div className="border-t border-border pt-3">
+                      <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Beneficios</h4>
+                      <ul className="space-y-1.5 text-xs text-muted-foreground">
+                        {vacancy.offers.map((off, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <Calendar className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                            <span>{off}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Actions */}
+                <div className="p-5 pt-0 space-y-2">
+                  <a
+                    href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Hola, quisiera más información y postularme para la plaza disponible de: ${vacancy.title}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2.5 px-4 rounded-lg transition shadow-sm"
+                  >
+                    <MessageCircle className="h-4 w-4" /> Aplicar por WhatsApp
+                  </a>
                   
-                  {/* Badge & Zoom Action */}
-                  <div className="absolute top-3 right-3 flex items-center gap-2">
-                    <button
-                      onClick={() => setSelectedFlyer(vacancy)}
-                      className="inline-flex items-center gap-1.5 bg-black/60 hover:bg-primary text-white text-xs font-medium px-2.5 py-1 rounded-lg backdrop-blur-md transition shadow-md"
-                      title="Ver afiche oficial"
-                    >
-                      <Eye className="h-3.5 w-3.5" /> Ver Afiche
-                    </button>
-                  </div>
-
-                  <div className="absolute bottom-3 left-3 right-3">
-                    <span className="inline-block bg-primary text-primary-foreground font-bold text-[11px] px-2.5 py-0.5 rounded-md uppercase tracking-wider mb-1">
-                      Plaza Disponible
-                    </span>
-                    <h3 className="text-xl font-bold text-white drop-shadow-sm">{vacancy.title}</h3>
-                  </div>
-                </div>
-
-                {/* Key Details Pills */}
-                <div className="p-5 space-y-4">
-                  <div className="space-y-2 text-xs text-foreground/90">
-                    <div className="flex items-start gap-2">
-                      <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                      <span><strong>Ubicación:</strong> {vacancy.location}</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Award className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                      <span><strong>Requisito:</strong> {vacancy.license}</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                      <span><strong>Ofrecemos:</strong> {vacancy.salary}</span>
-                    </div>
-                  </div>
-
-                  {/* Requisitos List */}
-                  <div className="border-t border-border pt-3">
-                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Requisitos Clave</h4>
-                    <ul className="space-y-1.5 text-xs text-muted-foreground">
-                      {vacancy.requirements.map((req, idx) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                          <span>{req}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Beneficios List */}
-                  <div className="border-t border-border pt-3">
-                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Beneficios</h4>
-                    <ul className="space-y-1.5 text-xs text-muted-foreground">
-                      {vacancy.offers.map((off, idx) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <Calendar className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-                          <span>{off}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  <button
+                    onClick={() => handleSelectPosition(vacancy.title)}
+                    className="w-full inline-flex items-center justify-center gap-2 bg-accent/80 hover:bg-accent text-accent-foreground font-semibold text-xs py-2 px-4 rounded-lg border border-border transition"
+                  >
+                    Llenar Formulario Web
+                  </button>
                 </div>
               </div>
-
-              {/* Card Actions */}
-              <div className="p-5 pt-0 space-y-2">
-                <a
-                  href={`https://wa.me/50230137849?text=${encodeURIComponent(`Hola, quisiera más información y postularme para la plaza disponible de: ${vacancy.title}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2.5 px-4 rounded-lg transition shadow-sm"
-                >
-                  <MessageCircle className="h-4 w-4" /> Aplicar por WhatsApp (3013-7849)
-                </a>
-                
-                <button
-                  onClick={() => handleSelectPosition(vacancy.title)}
-                  className="w-full inline-flex items-center justify-center gap-2 bg-accent/80 hover:bg-accent text-accent-foreground font-semibold text-xs py-2 px-4 rounded-lg border border-border transition"
-                >
-                  Llenar Formulario Web
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
