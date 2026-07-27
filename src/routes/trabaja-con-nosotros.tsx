@@ -234,12 +234,12 @@ function Page() {
               {/* Card Actions */}
               <div className="p-5 pt-0 space-y-2">
                 <a
-                  href={`https://wa.me/50230137849?text=${encodeURIComponent(`Hola, quisiera más información y postularme para la plaza disponible de: ${vacancy.title}`)}`}
+                  href={`https://wa.me/50235867452?text=${encodeURIComponent(`Hola, quisiera más información y postularme para la plaza disponible de: ${vacancy.title}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2.5 px-4 rounded-lg transition shadow-sm"
                 >
-                  <MessageCircle className="h-4 w-4" /> Aplicar por WhatsApp (3013-7849)
+                  <MessageCircle className="h-4 w-4" /> Aplicar por WhatsApp (3586-7452)
                 </a>
                 
                 <button
@@ -325,11 +325,11 @@ function Page() {
             </p>
             <div className="mt-3 flex flex-wrap gap-2 md:gap-3 text-xs md:text-sm font-medium">
               <a
-                href="mailto:recursoshumanos@logiservicios.com?subject=Aplicación%20de%20empleo"
+                href="mailto:reclutamiento@grupo-sitsa.com?subject=Aplicación%20de%20empleo"
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-accent/60 text-primary hover:bg-accent hover:border-primary/30 transition"
               >
                 <Mail className="h-3.5 w-3.5 text-gold" />
-                recursoshumanos@logiserviciosmonaco.com
+                reclutamiento@grupo-sitsa.com
               </a>
               <a
                 href="mailto:recursoshumanos@logiserviciosmonaco.com?subject=Aplicación%20de%20empleo"
@@ -381,15 +381,15 @@ function Page() {
             </div>
             <div className="p-4 bg-card border-t border-border flex flex-wrap items-center justify-between gap-2">
               <span className="text-xs text-muted-foreground">
-                Envía tu CV a <strong>recursoshumanos@logiserviciosmonaco.com</strong> con el asunto &quot;{selectedFlyer.subjectEmail}&quot;
+                Envía tu CV a <strong>reclutamiento@grupo-sitsa.com</strong> con el asunto &quot;{selectedFlyer.subjectEmail}&quot;
               </span>
               <a
-                href={`https://wa.me/50230137849?text=${encodeURIComponent(`Hola, vi el afiche de ${selectedFlyer.title} y deseo postularme.`)}`}
+                href={`https://wa.me/50235867452?text=${encodeURIComponent(`Hola, vi el afiche de ${selectedFlyer.title} y deseo postularme.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 bg-emerald-600 text-white font-semibold text-xs px-3 py-1.5 rounded-lg hover:bg-emerald-700 transition"
               >
-                <MessageCircle className="h-3.5 w-3.5" /> WhatsApp 3013-7849
+                <MessageCircle className="h-3.5 w-3.5" /> WhatsApp 3586-7452
               </a>
             </div>
           </div>

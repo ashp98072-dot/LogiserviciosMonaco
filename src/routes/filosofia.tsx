@@ -145,7 +145,7 @@ function Page() {
               NUESTRA FILOSOFÍA DE TRABAJO
             </span>
             <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
-              Acrónimo MÓNACO:
+              Acrónimo MÓNAC0: IMPULSO
             </h2>
             <p className="text-slate-600 dark:text-slate-300 mt-3 text-sm md:text-base leading-relaxed">
               Cada letra de la palabra <strong className="text-slate-900 dark:text-white font-bold">IMPULSO</strong> define el marco conceptual sobre el cual construimos nuestras operaciones diarias y guiamos a nuestro equipo.
