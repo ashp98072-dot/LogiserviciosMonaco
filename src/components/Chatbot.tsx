@@ -80,7 +80,7 @@ const FAQ: FaqItem[] = [
   {
     keywords: ["trabaja", "empleo", "trabajo", "piloto", "vacante", "aplicar", "reclutamiento", "rrhh", "cv"],
     answer:
-      "¡Nos encantaría conocerte! Ve a la sección 'Únete al equipo' para enviar tu CV o comunícate a recursoshumanos@logiserviciosmonaco.com o reclutamiento@grupo-sitsa.com.",
+      "¡Nos encantaría conocerte! Ve a la sección 'Únete al equipo' para enviar tu CV o comunícate a recursoshumanos@logiserviciosmonaco.com o por WhatsApp al 3013-7849.",
   },
   {
     keywords: ["dirección", "direccion", "ubicación", "ubicacion", "oficina"],
