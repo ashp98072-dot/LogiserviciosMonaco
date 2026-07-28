@@ -137,5 +137,20 @@
       "description": "Unidades cerradas para paquetería, documentos y carga delicada.",
       "image": "/fleet/panele-1ton.png"
     }
-  ]
+  ],
+  "generalInfo": {
+    "heroTitle": "Soluciones Logísticas y Transporte Terrestre en Guatemala",
+    "heroSubtitle": "Llegamos a donde tu negocio lo necesita con puntualidad, seguridad y cobertura en los 22 departamentos.",
+    "misionText": "Ofrecer servicios de transporte y logística integral eficientes, seguros y personalizados en Guatemala, impulsando el crecimiento comercial de nuestros clientes.",
+    "visionText": "Ser la empresa líder en soluciones de logística terrestre en Guatemala, reconocida por la excelencia operativa, innovación en servicio y compromiso con nuestros aliados.",
+    "coberturaText": "Contamos con presencia y rutas estratégicas operativas en los 22 departamentos del territorio nacional de Guatemala."
+  },
+  "branding": {
+    "logoUrl": "/src/assets/logo.png",
+    "heroBgUrl": "/src/assets/logo_1.png",
+    "warehouseBgUrl": "/src/assets/warehouse.jpg",
+    "coberturaMapUrl": "/src/assets/guatemala-map.jpg"
+  },
+  "customSections": [],
+  "adminPin": "1234"
 }

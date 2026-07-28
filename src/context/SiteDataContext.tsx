@@ -145,22 +145,7 @@ const DEFAULT_BRANDING: Branding = {
   coberturaMapUrl: mapImg,
 };
 
-const DEFAULT_CUSTOM_SECTIONS: CustomSection[] = [
-  {
-    id: "sec-1",
-    title: "Garantía de Calidad y Puntualidad",
-    subtitle: "Nuestra Ventaja Competitiva",
-    content: "En Logiservicios Mónaco nos aseguramos de que cada envío cumpla con los estándares más estrictos de seguridad, tiempos de entrega y monitoreo en tiempo real.",
-    imageUrl: warehouseImg,
-    buttonText: "Cotizar Servicio",
-    buttonUrl: "/contacto",
-    layoutStyle: "text-left",
-    bgStyle: "light",
-    active: true,
-    order: 1,
-    pageTarget: "inicio",
-  },
-];
+const DEFAULT_CUSTOM_SECTIONS: CustomSection[] = [];
 
 const DEFAULT_CONTACT_INFO: ContactInfo = {
   phone: "+502 4017-5893",
@@ -413,6 +398,11 @@ function sanitizeFleetImages(fleetList: FleetItem[]): FleetItem[] {
   });
 }
 
+function sanitizeCustomSections(sections: CustomSection[] | undefined): CustomSection[] {
+  if (!Array.isArray(sections)) return [];
+  return sections.filter((s) => s.id !== "sec-1" && !s.title?.includes("Garantía de Calidad") && !s.subtitle?.includes("Ventaja Competitiva"));
+}
+
 const LOCAL_STORAGE_KEY = "logiservicios_monaco_cms_data_v1";
 const GITHUB_CONFIG_KEY = "logiservicios_monaco_github_config_v1";
 
@@ -542,7 +532,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           fleet: sanitizeFleetImages(parsed.fleet || DEFAULT_FLEET),
           generalInfo: { ...DEFAULT_GENERAL_INFO, ...parsed.generalInfo },
           branding: { ...DEFAULT_BRANDING, ...parsed.branding },
-          customSections: parsed.customSections || DEFAULT_CUSTOM_SECTIONS,
+          customSections: sanitizeCustomSections(parsed.customSections || DEFAULT_CUSTOM_SECTIONS),
         };
       }
     } catch (e) {
@@ -573,7 +563,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               fleet: sanitizeFleetImages(serverData.fleet || DEFAULT_FLEET),
               generalInfo: { ...DEFAULT_GENERAL_INFO, ...serverData.generalInfo },
               branding: { ...DEFAULT_BRANDING, ...serverData.branding },
-              customSections: serverData.customSections || DEFAULT_CUSTOM_SECTIONS,
+              customSections: sanitizeCustomSections(serverData.customSections || DEFAULT_CUSTOM_SECTIONS),
             };
             if (isMounted) {
               setSiteData(merged);
