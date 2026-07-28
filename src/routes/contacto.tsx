@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Phone, Mail, MapPin, Send, MessageCircle } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
-import { useSiteData } from "@/context/SiteDataContext";
+import { useSiteData, extractMapUrl } from "@/context/SiteDataContext";
 import DynamicSections from "@/components/DynamicSections";
 
 export const Route = createFileRoute("/contacto")({
@@ -98,7 +98,7 @@ function Page() {
 }
 
 function MapComponent({ contact }: { contact: any }) {
-  const embedUrl = contact.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt";
+  const embedUrl = extractMapUrl(contact.mapEmbedUrl) || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt";
   const height = contact.mapHeight || "350px";
 
   return (

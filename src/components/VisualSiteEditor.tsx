@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useSiteData, CustomSection, Vacancy, FleetItem } from "@/context/SiteDataContext";
+import { useSiteData, CustomSection, Vacancy, FleetItem, extractMapUrl } from "@/context/SiteDataContext";
 import {
   Sparkles,
   FolderOpen,
@@ -1001,13 +1001,13 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
                           </label>
                           <input
                             type="text"
-                            value={siteData.contactInfo.mapEmbedUrl || ""}
-                            placeholder="https://www.google.com/maps/embed?..."
-                            onChange={(e) => updateContactInfo({ mapEmbedUrl: e.target.value })}
+                            value={extractMapUrl(siteData.contactInfo.mapEmbedUrl) || ""}
+                            placeholder="https://www.google.com/maps/embed?... o pega todo el código <iframe...>"
+                            onChange={(e) => updateContactInfo({ mapEmbedUrl: extractMapUrl(e.target.value) })}
                             className="w-full px-3 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white font-mono text-[10px]"
                           />
-                          <p className="text-[10px] text-neutral-500 mt-1">
-                            Obtén este enlace en Google Maps: Compartir &gt; Insertar un mapa &gt; copiar el atributo src de la etiqueta iframe.
+                          <p className="text-[10px] text-emerald-400 mt-1">
+                            ✨ Puedes pegar el enlace o todo el código <code className="bg-neutral-800 px-1 rounded text-neutral-300">&lt;iframe src="..."&gt;</code> que te da Google Maps. El sistema extraerá la dirección automáticamente.
                           </p>
                         </div>
                       </>
@@ -1685,7 +1685,7 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
                       </span>
                     </div>
                     <iframe
-                      src={siteData.contactInfo.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt"}
+                      src={extractMapUrl(siteData.contactInfo.mapEmbedUrl) || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt"}
                       width="100%"
                       height={siteData.contactInfo.mapHeight || "350px"}
                       style={{ border: 0 }}
@@ -1740,7 +1740,7 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
                           </span>
                         </div>
                         <iframe
-                          src={siteData.contactInfo.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt"}
+                          src={extractMapUrl(siteData.contactInfo.mapEmbedUrl) || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt"}
                           width="100%"
                           height={siteData.contactInfo.mapHeight || "300px"}
                           style={{ border: 0 }}
@@ -1823,7 +1823,7 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
                       </span>
                     </div>
                     <iframe
-                      src={siteData.contactInfo.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt"}
+                      src={extractMapUrl(siteData.contactInfo.mapEmbedUrl) || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt"}
                       width="100%"
                       height={siteData.contactInfo.mapHeight || "350px"}
                       style={{ border: 0 }}

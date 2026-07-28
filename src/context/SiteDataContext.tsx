@@ -167,7 +167,7 @@ const DEFAULT_CONTACT_INFO: ContactInfo = {
   formTitle: "Solicita tu cotización",
   formspreeUrl: "https://formspree.io/f/xzdndgdq",
   showMap: true,
-  mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt",
+  mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.559631403319!2d-90.55295749999999!3d14.567157199999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a11b33260bfb%3A0x55b9abd2a7a13cf4!2sColonia%20La%20Colina!5e0!3m2!1ses-419!2sgt!4v1785247597819!5m2!1ses-419!2sgt",
   mapPosition: "bottom",
   mapHeight: "350px",
 };
@@ -414,6 +414,16 @@ interface SiteDataContextType {
 
 const SiteDataContext = createContext<SiteDataContextType | undefined>(undefined);
 
+export function extractMapUrl(input: string | undefined): string {
+  if (!input) return "";
+  const trimmed = input.trim();
+  const srcMatch = trimmed.match(/src=["']([^"']+)["']/i);
+  if (srcMatch && srcMatch[1]) {
+    return srcMatch[1];
+  }
+  return trimmed;
+}
+
 const LOCAL_STORAGE_KEY = "logiservicios_monaco_cms_data_v1";
 
 export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -422,10 +432,14 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
+        const contact = { ...DEFAULT_CONTACT_INFO, ...parsed.contactInfo };
+        if (contact.mapEmbedUrl) {
+          contact.mapEmbedUrl = extractMapUrl(contact.mapEmbedUrl);
+        }
         return {
           ...DEFAULT_SITE_DATA,
           ...parsed,
-          contactInfo: { ...DEFAULT_CONTACT_INFO, ...parsed.contactInfo },
+          contactInfo: contact,
           generalInfo: { ...DEFAULT_GENERAL_INFO, ...parsed.generalInfo },
           branding: { ...DEFAULT_BRANDING, ...parsed.branding },
           customSections: parsed.customSections || DEFAULT_CUSTOM_SECTIONS,
@@ -446,9 +460,13 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [siteData]);
 
   const updateContactInfo = (info: Partial<ContactInfo>) => {
+    const updatedInfo = { ...info };
+    if (updatedInfo.mapEmbedUrl) {
+      updatedInfo.mapEmbedUrl = extractMapUrl(updatedInfo.mapEmbedUrl);
+    }
     setSiteData((prev) => ({
       ...prev,
-      contactInfo: { ...prev.contactInfo, ...info },
+      contactInfo: { ...prev.contactInfo, ...updatedInfo },
     }));
   };
 
