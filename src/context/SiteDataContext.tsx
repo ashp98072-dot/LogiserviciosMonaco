@@ -441,7 +441,8 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     async function fetchServerData() {
       try {
         const res = await fetch("/api/site-data");
-        if (res.ok) {
+        const contentType = res.headers.get("content-type") || "";
+        if (res.ok && contentType.includes("application/json")) {
           const json = await res.json();
           if (json.success && json.data) {
             const serverData = json.data;
@@ -466,7 +467,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           }
         }
       } catch (err) {
-        console.warn("Could not load from /api/site-data, using local cache.", err);
+        // Silently fallback to local default data on static servers
       } finally {
         if (isMounted) {
           setIsInitialized(true);
@@ -489,14 +490,17 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataToSave),
       });
-      const json = await res.json();
-      if (json.success) {
-        setLastSyncedAt(new Date().toLocaleTimeString());
-        setIsSyncing(false);
-        return true;
+      const contentType = res.headers.get("content-type") || "";
+      if (res.ok && contentType.includes("application/json")) {
+        const json = await res.json();
+        if (json && json.success) {
+          setLastSyncedAt(new Date().toLocaleTimeString());
+          setIsSyncing(false);
+          return true;
+        }
       }
     } catch (err) {
-      console.error("Error saving to server API:", err);
+      // Static hostings like GitHub pages/Netlify static don't run POST server endpoints
     }
     setIsSyncing(false);
     return false;
