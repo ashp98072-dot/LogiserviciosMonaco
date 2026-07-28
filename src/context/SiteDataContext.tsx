@@ -428,6 +428,24 @@ export function extractMapUrl(input: string | undefined): string {
   return trimmed;
 }
 
+function sanitizeFleetImages(fleetList: FleetItem[]): FleetItem[] {
+  if (!Array.isArray(fleetList) || fleetList.length === 0) return DEFAULT_FLEET;
+  return fleetList.map((item) => {
+    let img = item.image || "";
+    if (!img || img.includes("/src/assets/") || img.includes("freightliner") || img.includes("fuso_truck") || img.includes("isuzu_truck") || img.includes("liteace_panel")) {
+      const id = (item.id || "").toLowerCase();
+      if (id.includes("cabezal") || id.includes("furgon")) img = "/fleet/cabezales.png";
+      else if (id.includes("doble") || id.includes("12") || id.includes("10ton-refri")) img = "/fleet/unidades-12ton.png";
+      else if (id.includes("10") || id.includes("5")) img = "/fleet/unidades-5ton.png";
+      else if (id.includes("2.7")) img = "/fleet/unidades-2.7ton.png";
+      else if (id.includes("1ton")) img = "/fleet/panele-1ton.png";
+      else if (id.includes("1.5")) img = "/fleet/panel-1.5ton.png";
+      else img = "/fleet/cabezales.png";
+    }
+    return { ...item, image: img };
+  });
+}
+
 const LOCAL_STORAGE_KEY = "logiservicios_monaco_cms_data_v1";
 
 export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -448,6 +466,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           ...DEFAULT_SITE_DATA,
           ...parsed,
           contactInfo: contact,
+          fleet: sanitizeFleetImages(parsed.fleet || DEFAULT_FLEET),
           generalInfo: { ...DEFAULT_GENERAL_INFO, ...parsed.generalInfo },
           branding: { ...DEFAULT_BRANDING, ...parsed.branding },
           customSections: parsed.customSections || DEFAULT_CUSTOM_SECTIONS,
@@ -477,6 +496,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               ...DEFAULT_SITE_DATA,
               ...serverData,
               contactInfo: contact,
+              fleet: sanitizeFleetImages(serverData.fleet || DEFAULT_FLEET),
               generalInfo: { ...DEFAULT_GENERAL_INFO, ...serverData.generalInfo },
               branding: { ...DEFAULT_BRANDING, ...serverData.branding },
               customSections: serverData.customSections || DEFAULT_CUSTOM_SECTIONS,

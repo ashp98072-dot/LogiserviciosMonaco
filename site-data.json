@@ -85,7 +85,7 @@
       "modality": "Carga Masiva",
       "category": "seca",
       "description": "Unidades de alto rendimiento para transporte interurbano y de contenedores.",
-      "image": "/src/assets/freightliner_cascadia.png"
+      "image": "/fleet/cabezales.png"
     },
     {
       "id": "furgon53",
@@ -95,7 +95,7 @@
       "modality": "Volumen Alto",
       "category": "seca",
       "description": "Furgones secos cerrados de gran capacidad volumétrica.",
-      "image": "/src/assets/freightliner_cascadia.png"
+      "image": "/fleet/cabezales.png"
     },
     {
       "id": "dobleeje",
@@ -105,7 +105,7 @@
       "modality": "Carga Pesada",
       "category": "seca",
       "description": "Camiones de doble eje diseñados para cargas pesadas e industriales.",
-      "image": "/src/assets/fuso_truck_12t.png"
+      "image": "/fleet/unidades-12ton.png"
     },
     {
       "id": "12ton",
@@ -115,7 +115,7 @@
       "modality": "Interurbano",
       "category": "seca",
       "description": "Camiones Fuso / Isuzu de gran capacidad para distribución masiva.",
-      "image": "/src/assets/fuso_truck_12t.png"
+      "image": "/fleet/unidades-12ton.png"
     },
     {
       "id": "10ton",
@@ -125,7 +125,7 @@
       "modality": "Distribución Nacional",
       "category": "seca",
       "description": "Excelente balance entre peso y maniobrabilidad nacional.",
-      "image": "/src/assets/fuso_canter_5t.png"
+      "image": "/fleet/unidades-5ton.png"
     },
     {
       "id": "5ton",
@@ -135,7 +135,7 @@
       "modality": "Distribución Mediana",
       "category": "seca",
       "description": "Vehículos medianos equipados con furgón seco.",
-      "image": "/src/assets/fuso_canter_5t.png"
+      "image": "/fleet/unidades-5ton.png"
     },
     {
       "id": "2.7ton",
@@ -145,7 +145,7 @@
       "modality": "Acceso Urbano",
       "category": "seca",
       "description": "Camiones ligeros para reparto urbano ágil y entregas puntuales.",
-      "image": "/src/assets/isuzu_truck_2.7t.png"
+      "image": "/fleet/unidades-2.7ton.png"
     },
     {
       "id": "1ton-panele",
@@ -155,7 +155,7 @@
       "modality": "Urbano Compacto",
       "category": "seca",
       "description": "Unidades cerradas para paquetería, documentos y carga delicada.",
-      "image": "/src/assets/liteace_panel_1t.png"
+      "image": "/fleet/panele-1ton.png"
     },
     {
       "id": "1.5ton-panel",
@@ -165,7 +165,7 @@
       "modality": "Express Urbano",
       "category": "seca",
       "description": "Panel rápida con furgón seco ideal para entregas express.",
-      "image": "/src/assets/hiace_panel_1.5t.png"
+      "image": "/fleet/panel-1.5ton.png"
     },
     {
       "id": "10ton-refri",
@@ -175,7 +175,7 @@
       "modality": "Carga Refrigerada / Congelada",
       "category": "refrigerada",
       "description": "Unidad con sistema Termoking con monitoreo térmico 24/7.",
-      "image": "/src/assets/fuso_truck_12t.png"
+      "image": "/fleet/unidades-12ton.png"
     },
     {
       "id": "5ton-refri",
@@ -185,7 +185,7 @@
       "modality": "Carga Refrigerada / Perecederos",
       "category": "refrigerada",
       "description": "Ideal para la cadena de frío de alimentos y perecederos.",
-      "image": "/src/assets/fuso_canter_5t.png"
+      "image": "/fleet/unidades-5ton.png"
     }
   ]
 }

@@ -246,6 +246,11 @@ function Home() {
                           alt={item.title}
                           className="h-full w-full object-contain object-center group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            target.onerror = null;
+                            target.src = "/fleet/cabezales.png";
+                          }}
                         />
                       ) : (
                         <div className="h-full w-full bg-accent flex items-center justify-center text-muted-foreground font-semibold text-xs">
