@@ -67,6 +67,10 @@ function AdminPage() {
     setAdminPin,
     resetToDefaults,
     importData,
+    githubConfig,
+    updateGithubConfig,
+    syncToGitHub,
+    isSyncing,
   } = useSiteData();
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -242,6 +246,22 @@ function AdminPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={async () => {
+                  if (!githubConfig.token) {
+                    setActiveTab("ajustes");
+                    showSuccess("Por favor ingresa tu Token de GitHub en Ajustes para activar la publicación directa.");
+                    return;
+                  }
+                  showSuccess("⏳ Conectando con GitHub para publicar cambios...");
+                  const res = await syncToGitHub();
+                  showSuccess(res.message);
+                }}
+                disabled={isSyncing}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition disabled:opacity-50"
+              >
+                <Save className="h-4 w-4" /> {isSyncing ? "Guardando..." : "🚀 Publicar en GitHub"}
+              </button>
               <button
                 onClick={() => setEditorMode("visual")}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-gold-gradient text-gold-foreground font-bold text-xs shadow-xs hover:brightness-105 transition"
@@ -2044,6 +2064,75 @@ function AdminPage() {
           {/* TAB 5: AJUSTES & RESPALDO */}
           {activeTab === "ajustes" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* GitHub Direct Sync Box */}
+              <div className="md:col-span-2 bg-card border-2 border-emerald-500/30 rounded-xl p-6 space-y-4 shadow-sm">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div>
+                    <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-gold" /> Guardar y Publicar en la Nube (GitHub Direct Sync)
+                    </h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Sincroniza tus cambios de fotos, vacantes y flota directamente con tu repositorio de GitHub para que la web pública se actualice al instante.
+                    </p>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      showSuccess("⏳ Guardando cambios directamente en tu repositorio de GitHub...");
+                      const res = await syncToGitHub();
+                      showSuccess(res.message);
+                    }}
+                    disabled={isSyncing}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition disabled:opacity-50 shrink-0"
+                  >
+                    <Save className="h-4 w-4" /> {isSyncing ? "Guardando en GitHub..." : "🚀 Guardar y Publicar en GitHub"}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs pt-2">
+                  <div>
+                    <label className="block font-semibold mb-1 text-foreground">GitHub Personal Access Token (PAT)</label>
+                    <input
+                      type="password"
+                      value={githubConfig.token}
+                      onChange={(e) => updateGithubConfig({ token: e.target.value })}
+                      placeholder="ghp_xxxx... o github_pat_xxxx..."
+                      className="w-full px-3 py-2 rounded-lg border border-input bg-background font-mono text-xs"
+                    />
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Token con permiso de escritura (<code>repo</code>). Se guarda de forma segura en tu navegador.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold mb-1 text-foreground">Repositorio de GitHub (usuario/repo)</label>
+                    <input
+                      type="text"
+                      value={githubConfig.repo}
+                      onChange={(e) => updateGithubConfig({ repo: e.target.value })}
+                      placeholder="laulaisha8/logiserviciosmonaco"
+                      className="w-full px-3 py-2 rounded-lg border border-input bg-background font-mono text-xs"
+                    />
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Ejemplo: <code>laulaisha8/logiserviciosmonaco</code>
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold mb-1 text-foreground">Rama (Branch)</label>
+                    <input
+                      type="text"
+                      value={githubConfig.branch || "main"}
+                      onChange={(e) => updateGithubConfig({ branch: e.target.value })}
+                      placeholder="main"
+                      className="w-full px-3 py-2 rounded-lg border border-input bg-background font-mono text-xs"
+                    />
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Nombre de la rama (por defecto <code>main</code>).
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Security settings */}
               <div className="bg-card border border-border rounded-xl p-6 space-y-4 shadow-xs">
                 <h2 className="text-base font-bold text-foreground flex items-center gap-2">

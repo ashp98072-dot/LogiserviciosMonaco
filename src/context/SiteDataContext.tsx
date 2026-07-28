@@ -121,6 +121,13 @@ export interface CustomSection {
   textAlignment?: "left" | "center" | "right";
 }
 
+export interface GitHubSyncConfig {
+  token: string;
+  repo: string;
+  branch: string;
+  filePath: string;
+}
+
 export interface SiteData {
   contactInfo: ContactInfo;
   vacancies: Vacancy[];
@@ -341,6 +348,9 @@ interface SiteDataContextType {
   siteData: SiteData;
   isSyncing: boolean;
   lastSyncedAt: string | null;
+  githubConfig: GitHubSyncConfig;
+  updateGithubConfig: (cfg: Partial<GitHubSyncConfig>) => void;
+  syncToGitHub: (customConfig?: Partial<GitHubSyncConfig>) => Promise<{ success: boolean; message: string }>;
   syncWithServer: (customData?: SiteData) => Promise<boolean>;
   exportData: () => void;
   updateContactInfo: (info: Partial<ContactInfo>) => void;
@@ -404,11 +414,117 @@ function sanitizeFleetImages(fleetList: FleetItem[]): FleetItem[] {
 }
 
 const LOCAL_STORAGE_KEY = "logiservicios_monaco_cms_data_v1";
+const GITHUB_CONFIG_KEY = "logiservicios_monaco_github_config_v1";
+
+const DEFAULT_GITHUB_CONFIG: GitHubSyncConfig = {
+  token: "",
+  repo: "laulaisha8/logiserviciosmonaco",
+  branch: "main",
+  filePath: "site-data.json",
+};
 
 export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+
+  const [githubConfig, setGithubConfig] = useState<GitHubSyncConfig>(() => {
+    try {
+      const saved = localStorage.getItem(GITHUB_CONFIG_KEY);
+      if (saved) {
+        return { ...DEFAULT_GITHUB_CONFIG, ...JSON.parse(saved) };
+      }
+    } catch (e) {}
+    return DEFAULT_GITHUB_CONFIG;
+  });
+
+  const updateGithubConfig = (cfg: Partial<GitHubSyncConfig>) => {
+    setGithubConfig((prev) => {
+      const updated = { ...prev, ...cfg };
+      localStorage.setItem(GITHUB_CONFIG_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const syncToGitHub = async (customConfig?: Partial<GitHubSyncConfig>): Promise<{ success: boolean; message: string }> => {
+    const cfg = { ...githubConfig, ...customConfig };
+    if (!cfg.token || !cfg.repo) {
+      return {
+        success: false,
+        message: "Por favor ingresa tu Personal Access Token de GitHub y el Repositorio (ej: usuario/repositorio) en la pestaña Ajustes.",
+      };
+    }
+    setIsSyncing(true);
+    try {
+      const cleanRepo = cfg.repo.replace("https://github.com/", "").replace(".git", "").replace(/^\/+|\/+$/g, "").trim();
+      const filePath = cfg.filePath || "site-data.json";
+      const branch = cfg.branch || "main";
+
+      // 1. Fetch current file SHA if it exists
+      let sha: string | undefined = undefined;
+      try {
+        const getRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${filePath}?ref=${branch}`, {
+          headers: {
+            Authorization: `token ${cfg.token}`,
+            Accept: "application/vnd.github.v3+json",
+          },
+        });
+        if (getRes.ok) {
+          const fileData = await getRes.json();
+          sha = fileData.sha;
+        }
+      } catch (e) {
+        // file doesn't exist yet or new repo
+      }
+
+      // 2. Base64 encode siteData JSON safely for Unicode characters
+      const jsonString = JSON.stringify(siteData, null, 2);
+      const utf8Bytes = new TextEncoder().encode(jsonString);
+      let binary = "";
+      for (let i = 0; i < utf8Bytes.length; i++) {
+        binary += String.fromCharCode(utf8Bytes[i]);
+      }
+      const base64Content = btoa(binary);
+
+      // 3. Put to GitHub REST API
+      const putRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${filePath}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `token ${cfg.token}`,
+          Accept: "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: `Actualización de contenido desde Panel Administrador CMS (${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()})`,
+          content: base64Content,
+          sha: sha,
+          branch: branch,
+        }),
+      });
+
+      if (putRes.ok) {
+        setLastSyncedAt(new Date().toLocaleTimeString());
+        setIsSyncing(false);
+        return {
+          success: true,
+          message: "¡Excelente! Los datos se han guardado y publicado directamente en tu repositorio de GitHub. El sitio web se actualizará automáticamente.",
+        };
+      } else {
+        const errData = await putRes.json().catch(() => ({ message: "Respuesta no válida" }));
+        setIsSyncing(false);
+        return {
+          success: false,
+          message: `Error de GitHub (${putRes.status}): ${errData.message || "Verifica tu Token y permisos de escritura ('repo')."}`,
+        };
+      }
+    } catch (err: any) {
+      setIsSyncing(false);
+      return {
+        success: false,
+        message: `Error de red al conectar con GitHub: ${err.message || err}`,
+      };
+    }
+  };
 
   const [siteData, setSiteData] = useState<SiteData>(() => {
     try {
@@ -708,6 +824,9 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         siteData,
         isSyncing,
         lastSyncedAt,
+        githubConfig,
+        updateGithubConfig,
+        syncToGitHub,
         syncWithServer,
         exportData,
         updateContactInfo,

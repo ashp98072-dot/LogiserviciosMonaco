@@ -54,6 +54,9 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
     setFleet,
     setCustomSections,
     importData,
+    githubConfig,
+    updateGithubConfig,
+    syncToGitHub,
   } = useSiteData();
 
   // State for Customizer
@@ -176,12 +179,12 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
           </select>
         </div>
 
-        {/* Global Server Sync & Save Panel */}
+        {/* Global Server & GitHub Sync Panel */}
         <div className="p-3 bg-neutral-900 border-b border-neutral-800 space-y-2">
           <div className="flex items-center justify-between text-[11px]">
             <span className="font-bold text-white flex items-center gap-1.5">
               <span className={`h-2.5 w-2.5 rounded-full ${isSyncing ? "bg-amber-400 animate-ping" : "bg-emerald-400"}`}></span>
-              {isSyncing ? "Guardando en Servidor..." : "Servidor Sincronizado"}
+              {isSyncing ? "Guardando en GitHub..." : "Servidor y GitHub Listos"}
             </span>
             {lastSyncedAt && (
               <span className="text-[10px] text-neutral-400">
@@ -190,35 +193,49 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-col gap-1.5">
             <button
               onClick={async () => {
-                showNotification("⏳ Guardando imágenes y textos en el servidor...");
-                const ok = await syncWithServer();
-                if (ok) {
-                  showNotification("✨ ¡Guardado Globalmente! Todos los dispositivos verán tus imágenes y cambios");
-                } else {
-                  showNotification("⚠️ Guardado localmente");
+                if (!githubConfig.token) {
+                  showNotification("⚠️ Ingresa tu Token de GitHub en Ajustes del Panel para activar Publicación directa");
+                  return;
                 }
+                showNotification("⏳ Publicando cambios en tu repositorio de GitHub...");
+                const res = await syncToGitHub();
+                showNotification(res.success ? "🚀 ¡Publicado con éxito en GitHub!" : `❌ ${res.message}`);
               }}
-              className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer"
+              className="w-full px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-md cursor-pointer"
             >
-              <Save className="h-3.5 w-3.5" />
-              <span>Guardar Global</span>
+              <Save className="h-4 w-4" />
+              <span>🚀 Publicar Cambios en GitHub</span>
             </button>
 
-            <button
-              onClick={exportData}
-              className="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-              title="Descargar copia de seguridad en archivo JSON"
-            >
-              <Download className="h-3.5 w-3.5 text-neutral-400" />
-              <span>Backup JSON</span>
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={async () => {
+                  showNotification("⏳ Guardando en memoria local/servidor...");
+                  const ok = await syncWithServer();
+                  showNotification(ok ? "✨ ¡Guardado Local y Servidor!" : "✨ Guardado en Navegador");
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-semibold text-[11px] flex items-center justify-center gap-1 transition cursor-pointer"
+              >
+                <Save className="h-3 w-3 text-emerald-400" />
+                <span>Guardar Local</span>
+              </button>
+
+              <button
+                onClick={exportData}
+                className="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-semibold text-[11px] flex items-center justify-center gap-1 transition cursor-pointer"
+                title="Descargar copia de seguridad en archivo JSON"
+              >
+                <Download className="h-3 w-3 text-neutral-400" />
+                <span>Backup JSON</span>
+              </button>
+            </div>
           </div>
 
           <p className="text-[10px] text-emerald-400/90 leading-tight bg-emerald-950/40 p-2 rounded border border-emerald-800/50">
-            🌐 <strong>Sincronización activa:</strong> Cualquier cambio o imagen que subas aquí se guardará en el servidor. Al ingresar desde otros dispositivos (celulares, tablets o PCs), todos verán exactamente tus imágenes y textos actualizados.
+            🌐 <strong>Publicación en la Nube:</strong> Haz clic en <strong>🚀 Publicar Cambios en GitHub</strong> para subir directamente los datos y fotos a tu repositorio de GitHub (<code>{githubConfig.repo || "tu_usuario/tu_repo"}</code>) y actualizar el sitio web en vivo.
           </p>
         </div>
 
