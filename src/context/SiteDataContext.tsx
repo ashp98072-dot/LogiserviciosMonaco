@@ -433,6 +433,7 @@ const LOCAL_STORAGE_KEY = "logiservicios_monaco_cms_data_v1";
 export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   const [siteData, setSiteData] = useState<SiteData>(() => {
     try {
@@ -489,6 +490,10 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       } catch (err) {
         console.warn("Could not load from /api/site-data, using local cache.", err);
+      } finally {
+        if (isMounted) {
+          setIsInitialized(true);
+        }
       }
     }
     fetchServerData();
@@ -522,6 +527,8 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Sync to localStorage immediately & server with debounce
   useEffect(() => {
+    if (!isInitialized) return;
+
     try {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(siteData));
     } catch (e) {
@@ -533,7 +540,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [siteData]);
+  }, [siteData, isInitialized]);
 
   const updateContactInfo = (info: Partial<ContactInfo>) => {
     const updatedInfo = { ...info };

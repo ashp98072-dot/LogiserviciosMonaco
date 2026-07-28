@@ -17,13 +17,18 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
+  let inMemoryData: any = null;
+
   // API endpoint to GET site data
   app.get("/api/site-data", (req, res) => {
     try {
+      if (inMemoryData) {
+        return res.json({ success: true, data: inMemoryData });
+      }
       if (fs.existsSync(DATA_FILE)) {
         const fileContent = fs.readFileSync(DATA_FILE, "utf-8");
-        const data = JSON.parse(fileContent);
-        return res.json({ success: true, data });
+        inMemoryData = JSON.parse(fileContent);
+        return res.json({ success: true, data: inMemoryData });
       }
     } catch (err) {
       console.error("Error reading site-data.json:", err);
@@ -36,6 +41,7 @@ async function startServer() {
     try {
       const data = req.body;
       if (data && typeof data === "object") {
+        inMemoryData = data;
         fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf-8");
         return res.json({ success: true, message: "Site data saved successfully on server" });
       } else {
