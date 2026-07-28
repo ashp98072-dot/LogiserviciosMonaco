@@ -268,26 +268,6 @@ const DEFAULT_FLEET: FleetItem[] = [
     image: cabezalImg,
   },
   {
-    id: "furgon53",
-    title: "Furgón 53' / 48'",
-    capacity: "20 t / 400 qq",
-    dimensions: "53' – 48' × 8'",
-    modality: "Volumen Alto",
-    category: "seca",
-    description: "Furgones secos cerrados de gran capacidad volumétrica.",
-    image: cabezalImg,
-  },
-  {
-    id: "dobleeje",
-    title: "Doble Eje",
-    capacity: "15 t / 300 qq",
-    dimensions: "24' × 8'",
-    modality: "Carga Pesada",
-    category: "seca",
-    description: "Camiones de doble eje diseñados para cargas pesadas e industriales.",
-    image: fuso12Img,
-  },
-  {
     id: "12ton",
     title: "Camión 12 Toneladas",
     capacity: "12 t / 240 qq",
@@ -296,16 +276,6 @@ const DEFAULT_FLEET: FleetItem[] = [
     category: "seca",
     description: "Camiones Fuso / Isuzu de gran capacidad para distribución masiva.",
     image: fuso12Img,
-  },
-  {
-    id: "10ton",
-    title: "Camión 10 Toneladas",
-    capacity: "10 t / 200 qq",
-    dimensions: "24' × 8'",
-    modality: "Distribución Nacional",
-    category: "seca",
-    description: "Excelente balance entre peso y maniobrabilidad nacional.",
-    image: fuso5Img,
   },
   {
     id: "5ton",
@@ -328,16 +298,6 @@ const DEFAULT_FLEET: FleetItem[] = [
     image: isuzu2Img,
   },
   {
-    id: "1ton-panele",
-    title: "Panel 1 Tonelada",
-    capacity: "1 t",
-    dimensions: "Formatos Panel",
-    modality: "Urbano Compacto",
-    category: "seca",
-    description: "Unidades cerradas para paquetería, documentos y carga delicada.",
-    image: liteace1Img,
-  },
-  {
     id: "1.5ton-panel",
     title: "Panel HiAce 1.5 Toneladas",
     capacity: "1.5 t",
@@ -348,24 +308,14 @@ const DEFAULT_FLEET: FleetItem[] = [
     image: hiace15Img,
   },
   {
-    id: "10ton-refri",
-    title: "Camión 10 Tn Refrigerado",
-    capacity: "10 t / 200 qq",
-    dimensions: "24' × 8'",
-    modality: "Carga Refrigerada / Congelada",
-    category: "refrigerada",
-    description: "Unidad con sistema Termoking con monitoreo térmico 24/7.",
-    image: fuso12Img,
-  },
-  {
-    id: "5ton-refri",
-    title: "Camión 5 Tn Refrigerado",
-    capacity: "5 t / 100 qq",
-    dimensions: "16' × 8'",
-    modality: "Carga Refrigerada / Perecederos",
-    category: "refrigerada",
-    description: "Ideal para la cadena de frío de alimentos y perecederos.",
-    image: fuso5Img,
+    id: "1ton-panele",
+    title: "Panel 1 Tonelada",
+    capacity: "1 t",
+    dimensions: "Formatos Panel",
+    modality: "Urbano Compacto",
+    category: "seca",
+    description: "Unidades cerradas para paquetería, documentos y carga delicada.",
+    image: liteace1Img,
   },
 ];
 
@@ -428,15 +378,22 @@ export function extractMapUrl(input: string | undefined): string {
   return trimmed;
 }
 
+const ALLOWED_FLEET_IDS = ["cabezales", "12ton", "5ton", "2.7ton", "1.5ton-panel", "1ton-panele"];
+
 function sanitizeFleetImages(fleetList: FleetItem[]): FleetItem[] {
   if (!Array.isArray(fleetList) || fleetList.length === 0) return DEFAULT_FLEET;
-  return fleetList.map((item) => {
+  
+  // Filter out extra items not in allowed 6 IDs
+  const filtered = fleetList.filter((item) => ALLOWED_FLEET_IDS.includes(item.id));
+  if (filtered.length === 0) return DEFAULT_FLEET;
+
+  return filtered.map((item) => {
     let img = item.image || "";
     if (!img || img.includes("/src/assets/") || img.includes("freightliner") || img.includes("fuso_truck") || img.includes("isuzu_truck") || img.includes("liteace_panel")) {
       const id = (item.id || "").toLowerCase();
-      if (id.includes("cabezal") || id.includes("furgon")) img = "/fleet/cabezales.png";
-      else if (id.includes("doble") || id.includes("12") || id.includes("10ton-refri")) img = "/fleet/unidades-12ton.png";
-      else if (id.includes("10") || id.includes("5")) img = "/fleet/unidades-5ton.png";
+      if (id.includes("cabezal")) img = "/fleet/cabezales.png";
+      else if (id.includes("12")) img = "/fleet/unidades-12ton.png";
+      else if (id.includes("5")) img = "/fleet/unidades-5ton.png";
       else if (id.includes("2.7")) img = "/fleet/unidades-2.7ton.png";
       else if (id.includes("1ton")) img = "/fleet/panele-1ton.png";
       else if (id.includes("1.5")) img = "/fleet/panel-1.5ton.png";
