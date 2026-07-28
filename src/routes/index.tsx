@@ -6,6 +6,7 @@ import hero from "@/assets/logo_1.png";
 import warehouse from "@/assets/warehouse.jpg";
 import logoMark from "@/assets/logo-mark.png";
 import { useSiteData } from "@/context/SiteDataContext";
+import DynamicSections from "@/components/DynamicSections";
 
 import cabezalImg from "@/assets/cabezales.png";
 import fuso5Img from "@/assets/Unidades de 5 Ton.png";
@@ -119,7 +120,7 @@ function Home() {
         </div>
         <div className="relative max-w-7xl mx-auto px-4 py-24 md:py-36 text-primary-foreground">
           <span className="inline-block px-3 py-1 rounded-full bg-gold text-gold-foreground text-xs font-semibold tracking-wide uppercase">
-            Logística Guatemala
+            {siteData.generalInfo?.heroBadge || "Logística Guatemala"}
           </span>
           <h1 className="mt-4 text-4xl md:text-6xl font-bold max-w-3xl leading-tight">
             {siteData.generalInfo?.heroTitle || "Movemos tu carga por toda Guatemala."}
@@ -137,10 +138,10 @@ function Home() {
           </div>
           <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl">
             {[
-              ["22", "Departamentos"],
-              ["24/7", "Monitoreo"],
-              ["+10", "Años de experiencia"],
-              ["100%", "Compromiso"],
+              [siteData.generalInfo?.heroStat1Number || "22", siteData.generalInfo?.heroStat1Label || "Departamentos"],
+              [siteData.generalInfo?.heroStat2Number || "24/7", siteData.generalInfo?.heroStat2Label || "Monitoreo"],
+              [siteData.generalInfo?.heroStat3Number || "+10", siteData.generalInfo?.heroStat3Label || "Años de experiencia"],
+              [siteData.generalInfo?.heroStat4Number || "100%", siteData.generalInfo?.heroStat4Label || "Compromiso"],
             ].map(([n, l]) => (
               <div key={l}>
                 <div className="text-3xl font-bold text-gold">{n}</div>
@@ -214,49 +215,66 @@ function Home() {
           </div>
 
           {/* Vista 1: Catálogo Visual */}
-          {activeTab === "catalog" && (
-            <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {TRUCK_CATALOG.map((truck) => (
-                <div
-                  key={truck.id}
-                  className="rounded-2xl border border-border bg-card overflow-hidden shadow-card hover:shadow-elegant transition-all duration-300 group flex flex-col"
-                >
-                  {/* Image container */}
-                  <div className="relative h-56 md:h-60 bg-white overflow-hidden flex items-center justify-center p-3 border-b border-border">
-                    <img
-                      src={truck.image}
-                      alt={truck.name}
-                      className="h-full w-full object-contain object-center group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                    />
-                  </div>
+          {activeTab === "catalog" && (() => {
+            const fleetItems = siteData.fleet && siteData.fleet.length > 0 ? siteData.fleet : TRUCK_CATALOG.map(t => ({ id: t.id, title: t.name, capacity: t.capacity, description: t.description, image: t.image }));
+            const gridCols = siteData.generalInfo?.fleetGridCols || "3";
+            const alignment = siteData.generalInfo?.fleetAlignment || "center";
 
-                  {/* Details */}
-                  <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                    <div>
-                      <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors text-center">
-                        {truck.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mt-2 text-center line-clamp-2">
-                        {truck.description}
-                      </p>
+            let gridContainerClass = "grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+            if (gridCols === "2") {
+              gridContainerClass = "grid gap-8 grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto";
+            } else if (gridCols === "4") {
+              gridContainerClass = "grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
+            } else if (gridCols === "auto") {
+              gridContainerClass = `flex flex-wrap gap-8 ${alignment === "center" ? "justify-center" : "justify-start"}`;
+            }
+
+            return (
+              <div className={gridContainerClass}>
+                {fleetItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`rounded-2xl border border-border bg-card overflow-hidden shadow-card hover:shadow-elegant transition-all duration-300 group flex flex-col ${
+                      gridCols === "auto" ? "w-full sm:w-[320px] md:w-[360px] shrink-0" : ""
+                    }`}
+                  >
+                    {/* Image container */}
+                    <div className="relative h-56 md:h-60 bg-white overflow-hidden flex items-center justify-center p-3 border-b border-border">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="h-full w-full object-contain object-center group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-accent flex items-center justify-center text-muted-foreground font-semibold text-xs">
+                          Sin imagen
+                        </div>
+                      )}
                     </div>
 
-                    <div className="pt-3 border-t border-border grid grid-cols-2 gap-2 text-xs">
-                      <div className="bg-muted/60 p-2.5 rounded-xl text-center">
-                        <span className="block text-muted-foreground text-[10px] font-bold uppercase tracking-wider">Capacidad</span>
-                        <strong className="text-foreground text-xs font-bold block mt-0.5">{truck.capacity}</strong>
+                    {/* Details */}
+                    <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                      <div>
+                        <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors text-center">
+                          {item.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-2 text-center line-clamp-3">
+                          {item.description}
+                        </p>
                       </div>
-                      <div className="bg-muted/60 p-2.5 rounded-xl text-center">
-                        <span className="block text-muted-foreground text-[10px] font-bold uppercase tracking-wider">Medidas</span>
-                        <strong className="text-foreground text-xs font-bold block mt-0.5">{truck.dimensions}</strong>
+
+                      <div className="pt-3 border-t border-border bg-muted/30 p-2.5 rounded-xl text-center">
+                        <span className="block text-muted-foreground text-[10px] font-bold uppercase tracking-wider">Capacidad / Tonelaje</span>
+                        <strong className="text-foreground text-xs font-bold block mt-0.5">{item.capacity}</strong>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            );
+          })()}
 
           {/* Vista 2: Tablas de Capacidades y Dimensiones */}
           {activeTab === "specs" && (
@@ -388,192 +406,8 @@ function Home() {
         </div>
       </section>
 
-      {/* Secciones Dinámicas / Personalizables */}
-      {activeSections.length > 0 && (
-        <div className="space-y-0">
-          {activeSections.map((sec) => {
-            const isDark = sec.bgStyle === "dark";
-            const isGold = sec.bgStyle === "gold";
-
-            const bgClass = isDark
-              ? "bg-neutral-900 text-white py-20"
-              : isGold
-              ? "bg-hero-gradient text-white py-20"
-              : "bg-background py-20 border-t border-border";
-
-            if (sec.layoutStyle === "banner") {
-              return (
-                <section key={sec.id} className={`${bgClass} relative overflow-hidden`}>
-                  {sec.imageUrl && (
-                    <div className="absolute inset-0 opacity-20">
-                      <img src={sec.imageUrl} alt={sec.title} className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                  <div className="relative max-w-5xl mx-auto px-4 text-center">
-                    {sec.subtitle && (
-                      <span className="inline-block px-3 py-1 rounded-full bg-gold/20 text-gold text-xs font-semibold uppercase tracking-wider mb-3">
-                        {sec.subtitle}
-                      </span>
-                    )}
-                    <h2 className="text-3xl md:text-5xl font-bold">{sec.title}</h2>
-                    <p className="mt-4 text-lg opacity-90 max-w-2xl mx-auto whitespace-pre-line">{sec.content}</p>
-                    {sec.buttonText && sec.buttonUrl && (
-                      <div className="mt-8">
-                        {sec.buttonUrl.startsWith("http") ? (
-                          <a
-                            href={sec.buttonUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 bg-gold-gradient text-gold-foreground font-bold px-6 py-3 rounded-xl shadow-md hover:brightness-105 transition"
-                          >
-                            {sec.buttonText} <ArrowRight className="h-4 w-4" />
-                          </a>
-                        ) : (
-                          <Link
-                            to={sec.buttonUrl}
-                            className="inline-flex items-center gap-2 bg-gold-gradient text-gold-foreground font-bold px-6 py-3 rounded-xl shadow-md hover:brightness-105 transition"
-                          >
-                            {sec.buttonText} <ArrowRight className="h-4 w-4" />
-                          </Link>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </section>
-              );
-            }
-
-            if (sec.layoutStyle === "text-right") {
-              return (
-                <section key={sec.id} className={bgClass}>
-                  <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
-                    {sec.imageUrl ? (
-                      <img src={sec.imageUrl} alt={sec.title} className="rounded-xl shadow-elegant w-full h-auto object-cover max-h-[450px]" />
-                    ) : (
-                      <div className="h-64 rounded-xl bg-accent flex items-center justify-center p-6 text-center text-muted-foreground">
-                        <Sparkles className="h-12 w-12 text-gold opacity-60" />
-                      </div>
-                    )}
-                    <div>
-                      {sec.subtitle && (
-                        <span className="text-gold font-semibold uppercase text-sm tracking-wider">{sec.subtitle}</span>
-                      )}
-                      <h2 className="mt-2 text-3xl md:text-4xl font-bold">{sec.title}</h2>
-                      <p className="mt-4 opacity-85 leading-relaxed whitespace-pre-line">{sec.content}</p>
-                      {sec.buttonText && sec.buttonUrl && (
-                        <div className="mt-6">
-                          {sec.buttonUrl.startsWith("http") ? (
-                            <a
-                              href={sec.buttonUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all"
-                            >
-                              {sec.buttonText} <ArrowRight className="h-4 w-4" />
-                            </a>
-                          ) : (
-                            <Link
-                              to={sec.buttonUrl}
-                              className="inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all"
-                            >
-                              {sec.buttonText} <ArrowRight className="h-4 w-4" />
-                            </Link>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </section>
-              );
-            }
-
-            if (sec.layoutStyle === "card") {
-              return (
-                <section key={sec.id} className={bgClass}>
-                  <div className="max-w-5xl mx-auto px-4">
-                    <div className="rounded-2xl border border-border bg-card p-8 md:p-12 shadow-elegant">
-                      {sec.subtitle && (
-                        <span className="text-gold font-semibold uppercase text-xs tracking-wider">{sec.subtitle}</span>
-                      )}
-                      <h2 className="mt-1 text-2xl md:text-4xl font-bold text-foreground">{sec.title}</h2>
-                      <p className="mt-4 text-muted-foreground whitespace-pre-line">{sec.content}</p>
-                      {sec.imageUrl && (
-                        <div className="mt-6 rounded-xl overflow-hidden max-h-[350px]">
-                          <img src={sec.imageUrl} alt={sec.title} className="w-full h-full object-cover" />
-                        </div>
-                      )}
-                      {sec.buttonText && sec.buttonUrl && (
-                        <div className="mt-6">
-                          {sec.buttonUrl.startsWith("http") ? (
-                            <a
-                              href={sec.buttonUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-5 py-2.5 rounded-lg hover:bg-primary/90 transition"
-                            >
-                              {sec.buttonText} <ArrowRight className="h-4 w-4" />
-                            </a>
-                          ) : (
-                            <Link
-                              to={sec.buttonUrl}
-                              className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-5 py-2.5 rounded-lg hover:bg-primary/90 transition"
-                            >
-                              {sec.buttonText} <ArrowRight className="h-4 w-4" />
-                            </Link>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </section>
-              );
-            }
-
-            // Default: text-left
-            return (
-              <section key={sec.id} className={bgClass}>
-                <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
-                  <div>
-                    {sec.subtitle && (
-                      <span className="text-gold font-semibold uppercase text-sm tracking-wider">{sec.subtitle}</span>
-                    )}
-                    <h2 className="mt-2 text-3xl md:text-4xl font-bold">{sec.title}</h2>
-                    <p className="mt-4 opacity-85 leading-relaxed whitespace-pre-line">{sec.content}</p>
-                    {sec.buttonText && sec.buttonUrl && (
-                      <div className="mt-6">
-                        {sec.buttonUrl.startsWith("http") ? (
-                          <a
-                            href={sec.buttonUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all"
-                          >
-                            {sec.buttonText} <ArrowRight className="h-4 w-4" />
-                          </a>
-                        ) : (
-                          <Link
-                            to={sec.buttonUrl}
-                            className="inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all"
-                          >
-                            {sec.buttonText} <ArrowRight className="h-4 w-4" />
-                          </Link>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  {sec.imageUrl ? (
-                    <img src={sec.imageUrl} alt={sec.title} className="rounded-xl shadow-elegant w-full h-auto object-cover max-h-[450px]" />
-                  ) : (
-                    <div className="h-64 rounded-xl bg-accent flex items-center justify-center p-6 text-center text-muted-foreground">
-                      <Sparkles className="h-12 w-12 text-gold opacity-60" />
-                    </div>
-                  )}
-                </div>
-              </section>
-            );
-          })}
-        </div>
-      )}
+      {/* Secciones Dinámicas Personalizables */}
+      <DynamicSections page="inicio" />
 
       {/* CTA */}
       <section className="max-w-7xl mx-auto px-4 py-20">

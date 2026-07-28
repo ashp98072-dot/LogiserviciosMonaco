@@ -3,6 +3,7 @@ import { MapPin } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
 import mapImg from "@/assets/guatemala-map.jpg";
 import { useSiteData } from "@/context/SiteDataContext";
+import DynamicSections from "@/components/DynamicSections";
 
 const DEPARTAMENTOS = [
   "Guatemala", "Sacatepéquez", "Chimaltenango", "Escuintla",
@@ -34,9 +35,11 @@ function Page() {
       <section className="bg-hero-gradient text-primary-foreground py-20">
         <div className="max-w-5xl mx-auto px-4">
           <span className="text-gold font-semibold uppercase text-sm tracking-wider">Logística Guatemala</span>
-          <h1 className="mt-2 text-4xl md:text-5xl font-bold">Cobertura en todo el país</h1>
+          <h1 className="mt-2 text-4xl md:text-5xl font-bold">
+            {siteData.generalInfo?.coberturaHeroTitle || "Cobertura en todo el país"}
+          </h1>
           <p className="mt-4 max-w-2xl text-primary-foreground/85">
-            Movemos tu carga a los <strong className="text-gold">22 departamentos</strong> de Guatemala, desde la costa hasta el altiplano y el oriente.
+            {siteData.generalInfo?.coberturaHeroSubtitle || siteData.generalInfo?.coberturaText || "Movemos tu carga a los 22 departamentos de Guatemala, desde la costa hasta el altiplano y el oriente."}
           </p>
         </div>
       </section>
@@ -56,6 +59,8 @@ function Page() {
           </div>
         </div>
       </section>
+
+      <DynamicSections page="cobertura" />
     </SiteLayout>
   );
 }

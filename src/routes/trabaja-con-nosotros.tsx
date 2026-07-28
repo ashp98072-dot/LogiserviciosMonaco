@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Send, Briefcase, Mail, MapPin, Award, CheckCircle2, DollarSign, Calendar, MessageCircle, Eye, X, Sparkles } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
 import { useSiteData, Vacancy } from "@/context/SiteDataContext";
+import DynamicSections from "@/components/DynamicSections";
 
 export const Route = createFileRoute("/trabaja-con-nosotros")({
   head: () => ({
@@ -32,6 +33,21 @@ function Page() {
     }
   };
 
+  const heroTitle = siteData.generalInfo?.trabajaHeroTitle || "Únete a Nuestro Equipo";
+  const heroSubtitle = siteData.generalInfo?.trabajaHeroSubtitle || "Forma parte de la red logística líder en Guatemala. Buscamos pilotos profesionales de transporte pesado y distribución comprometidos con la excelencia.";
+
+  const gridCols = siteData.generalInfo?.vacanciesGridCols || "3";
+  const alignment = siteData.generalInfo?.vacanciesAlignment || "center";
+
+  let gridContainerClass = "grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+  if (gridCols === "1") {
+    gridContainerClass = "grid gap-8 grid-cols-1 max-w-2xl mx-auto";
+  } else if (gridCols === "2") {
+    gridContainerClass = "grid gap-8 grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto";
+  } else if (gridCols === "auto") {
+    gridContainerClass = `flex flex-wrap gap-8 ${alignment === "center" ? "justify-center" : "justify-start"}`;
+  }
+
   return (
     <SiteLayout>
       {/* Hero Header */}
@@ -40,9 +56,9 @@ function Page() {
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/20 text-gold font-semibold uppercase text-xs tracking-wider border border-gold/30">
             <Sparkles className="h-3.5 w-3.5" /> Oportunidades Laborales Activas
           </span>
-          <h1 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight">Únete a Nuestro Equipo</h1>
+          <h1 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight">{heroTitle}</h1>
           <p className="mt-4 max-w-2xl text-primary-foreground/85 text-base md:text-lg">
-            Forma parte de la red logística líder en Guatemala. Buscamos pilotos profesionales de transporte pesado y distribución comprometidos con la excelencia.
+            {heroSubtitle}
           </p>
         </div>
       </section>
@@ -64,13 +80,15 @@ function Page() {
         </div>
 
         {/* Job Cards Grid */}
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className={gridContainerClass}>
           {vacancies.map((vacancy) => {
             const waNumber = vacancy.whatsappNumber || contact.whatsappRRHH || "50230137849";
             return (
               <div
                 key={vacancy.id}
-                className="group rounded-2xl border border-border bg-card shadow-card hover:shadow-elegant transition-all duration-300 flex flex-col justify-between overflow-hidden"
+                className={`group rounded-2xl border border-border bg-card shadow-card hover:shadow-elegant transition-all duration-300 flex flex-col justify-between overflow-hidden ${
+                  gridCols === "auto" ? "w-full sm:w-[320px] md:w-[350px] shrink-0" : ""
+                }`}
               >
                 <div>
                   {/* Header Banner & Image Thumbnail */}
@@ -313,6 +331,8 @@ function Page() {
           </div>
         </div>
       )}
+
+      <DynamicSections page="trabaja" />
     </SiteLayout>
   );
 }

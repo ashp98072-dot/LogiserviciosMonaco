@@ -26,6 +26,8 @@ export interface ContactInfo {
   address: string;
   facebookUrl: string;
   schedule: string;
+  formTitle?: string;
+  formspreeUrl?: string;
 }
 
 export interface Vacancy {
@@ -49,14 +51,38 @@ export interface FleetItem {
   capacity: string;
   description: string;
   image: string;
+  dimensions?: string;
+  modality?: string;
+  category?: "seca" | "refrigerada";
 }
 
 export interface GeneralInfo {
   heroTitle: string;
   heroSubtitle: string;
+  heroBadge?: string;
+  heroStat1Number?: string;
+  heroStat1Label?: string;
+  heroStat2Number?: string;
+  heroStat2Label?: string;
+  heroStat3Number?: string;
+  heroStat3Label?: string;
+  heroStat4Number?: string;
+  heroStat4Label?: string;
   misionText: string;
   visionText: string;
   coberturaText: string;
+  trabajaHeroTitle?: string;
+  trabajaHeroSubtitle?: string;
+  coberturaHeroTitle?: string;
+  coberturaHeroSubtitle?: string;
+  quienesSomosHeroTitle?: string;
+  quienesSomosHeroSubtitle?: string;
+  contactoHeroTitle?: string;
+  contactoHeroSubtitle?: string;
+  fleetGridCols?: "2" | "3" | "4" | "auto";
+  fleetAlignment?: "center" | "left";
+  vacanciesGridCols?: "1" | "2" | "3" | "auto";
+  vacanciesAlignment?: "center" | "left";
 }
 
 export interface Branding {
@@ -72,12 +98,23 @@ export interface CustomSection {
   subtitle: string;
   content: string;
   imageUrl: string;
+  mediaType?: "image" | "video";
+  videoUrl?: string;
   buttonText: string;
   buttonUrl: string;
-  layoutStyle: "text-left" | "text-right" | "card" | "banner";
+  layoutStyle: "text-left" | "text-right" | "card" | "banner" | "video" | "features" | "stats";
   bgStyle: "light" | "dark" | "gold";
   active: boolean;
   order: number;
+  pageTarget?: "inicio" | "quienes-somos" | "cobertura" | "trabaja" | "contacto" | "todas";
+  featuresList?: string[];
+  statsList?: { label: string; value: string }[];
+  titleColor?: "default" | "gold" | "primary" | "white" | "red" | "black";
+  subtitleColor?: "gold" | "primary" | "white" | "muted" | "red";
+  textColor?: "default" | "muted" | "white" | "dark";
+  fontFamily?: "sans" | "serif" | "mono" | "display";
+  titleSize?: "normal" | "large" | "huge";
+  textAlignment?: "left" | "center" | "right";
 }
 
 export interface SiteData {
@@ -110,6 +147,7 @@ const DEFAULT_CUSTOM_SECTIONS: CustomSection[] = [
     bgStyle: "light",
     active: true,
     order: 1,
+    pageTarget: "inicio",
   },
 ];
 
@@ -122,6 +160,8 @@ const DEFAULT_CONTACT_INFO: ContactInfo = {
   address: "Calzada Atanasio Tzul 22-00 Zona 12, Empresarial el Cortijo II, Bodega 403, Guatemala",
   facebookUrl: "https://www.facebook.com/share/1CirGxQ8no/",
   schedule: "Lunes a Viernes: 8:00 AM - 5:00 PM | Sábados: 8:00 AM - 12:00 PM",
+  formTitle: "Solicita tu cotización",
+  formspreeUrl: "https://formspree.io/f/xzdndgdq",
 };
 
 const DEFAULT_VACANCIES: Vacancy[] = [
@@ -211,45 +251,113 @@ const DEFAULT_VACANCIES: Vacancy[] = [
 const DEFAULT_FLEET: FleetItem[] = [
   {
     id: "cabezales",
-    title: "Cabezales",
-    capacity: "Carga pesada / Contenedores",
+    title: "Cabezales / Rastra",
+    capacity: "23 t / 400 qq",
+    dimensions: "45' × 8'",
+    modality: "Carga Masiva",
+    category: "seca",
     description: "Unidades de alto rendimiento para transporte interurbano y de contenedores.",
     image: cabezalImg,
   },
   {
+    id: "furgon53",
+    title: "Furgón 53' / 48'",
+    capacity: "20 t / 400 qq",
+    dimensions: "53' – 48' × 8'",
+    modality: "Volumen Alto",
+    category: "seca",
+    description: "Furgones secos cerrados de gran capacidad volumétrica.",
+    image: cabezalImg,
+  },
+  {
+    id: "dobleeje",
+    title: "Doble Eje",
+    capacity: "15 t / 300 qq",
+    dimensions: "24' × 8'",
+    modality: "Carga Pesada",
+    category: "seca",
+    description: "Camiones de doble eje diseñados para cargas pesadas e industriales.",
+    image: fuso12Img,
+  },
+  {
     id: "12ton",
-    title: "Unidades de 12 Toneladas",
-    capacity: "12 Toneladas",
+    title: "Camión 12 Toneladas",
+    capacity: "12 t / 240 qq",
+    dimensions: "24' × 8'",
+    modality: "Interurbano",
+    category: "seca",
     description: "Camiones Fuso / Isuzu de gran capacidad para distribución masiva.",
     image: fuso12Img,
   },
   {
+    id: "10ton",
+    title: "Camión 10 Toneladas",
+    capacity: "10 t / 200 qq",
+    dimensions: "24' × 8'",
+    modality: "Distribución Nacional",
+    category: "seca",
+    description: "Excelente balance entre peso y maniobrabilidad nacional.",
+    image: fuso5Img,
+  },
+  {
     id: "5ton",
-    title: "Unidades de 5 Toneladas",
-    capacity: "5 a 8 Toneladas",
-    description: "Vehículos medianos equipados con furgón y refrigeración opcional.",
+    title: "Camión 5 Toneladas",
+    capacity: "5 t / 100 qq",
+    dimensions: "16' × 8'",
+    modality: "Distribución Mediana",
+    category: "seca",
+    description: "Vehículos medianos equipados con furgón seco.",
     image: fuso5Img,
   },
   {
     id: "2.7ton",
-    title: "Unidades de 2.7 Toneladas",
-    capacity: "2.7 Toneladas",
+    title: "Camión 2.7 Toneladas",
+    capacity: "2.7 t / 50 qq",
+    dimensions: "12' × 5'",
+    modality: "Acceso Urbano",
+    category: "seca",
     description: "Camiones ligeros para reparto urbano ágil y entregas puntuales.",
     image: isuzu2Img,
   },
   {
     id: "1ton-panele",
-    title: "Paneles de 1 Tonelada",
-    capacity: "1 Tonelada",
+    title: "Panel 1 Tonelada",
+    capacity: "1 t",
+    dimensions: "Formatos Panel",
+    modality: "Urbano Compacto",
+    category: "seca",
     description: "Unidades cerradas para paquetería, documentos y carga delicada.",
     image: liteace1Img,
   },
   {
     id: "1.5ton-panel",
     title: "Panel HiAce 1.5 Toneladas",
-    capacity: "1.5 Toneladas",
+    capacity: "1.5 t",
+    dimensions: "Formatos Panel",
+    modality: "Express Urbano",
+    category: "seca",
     description: "Panel rápida con furgón seco ideal para entregas express.",
     image: hiace15Img,
+  },
+  {
+    id: "10ton-refri",
+    title: "Camión 10 Tn Refrigerado",
+    capacity: "10 t / 200 qq",
+    dimensions: "24' × 8'",
+    modality: "Carga Refrigerada / Congelada",
+    category: "refrigerada",
+    description: "Unidad con sistema Termoking con monitoreo térmico 24/7.",
+    image: fuso12Img,
+  },
+  {
+    id: "5ton-refri",
+    title: "Camión 5 Tn Refrigerado",
+    capacity: "5 t / 100 qq",
+    dimensions: "16' × 8'",
+    modality: "Carga Refrigerada / Perecederos",
+    category: "refrigerada",
+    description: "Ideal para la cadena de frío de alimentos y perecederos.",
+    image: fuso5Img,
   },
 ];
 
@@ -277,14 +385,20 @@ interface SiteDataContextType {
   updateVacancy: (id: string, updated: Partial<Vacancy>) => void;
   addVacancy: (vacancy: Omit<Vacancy, "id">) => void;
   deleteVacancy: (id: string) => void;
+  moveVacancy: (id: string, direction: "up" | "down") => void;
+  setVacancies: (vacancies: Vacancy[]) => void;
   updateFleetItem: (id: string, updated: Partial<FleetItem>) => void;
   addFleetItem: (item: Omit<FleetItem, "id">) => void;
   deleteFleetItem: (id: string) => void;
+  moveFleetItem: (id: string, direction: "up" | "down") => void;
+  setFleet: (fleet: FleetItem[]) => void;
   updateGeneralInfo: (info: Partial<GeneralInfo>) => void;
   updateBranding: (branding: Partial<Branding>) => void;
   addCustomSection: (section: Omit<CustomSection, "id">) => void;
   updateCustomSection: (id: string, updated: Partial<CustomSection>) => void;
   deleteCustomSection: (id: string) => void;
+  moveCustomSection: (id: string, direction: "up" | "down") => void;
+  setCustomSections: (sections: CustomSection[]) => void;
   setAdminPin: (pin: string) => void;
   resetToDefaults: () => void;
   importData: (data: SiteData) => void;
@@ -353,6 +467,22 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }));
   };
 
+  const moveVacancy = (id: string, direction: "up" | "down") => {
+    setSiteData((prev) => {
+      const list = [...prev.vacancies];
+      const index = list.findIndex((v) => v.id === id);
+      if (index === -1) return prev;
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= list.length) return prev;
+
+      const temp = list[index];
+      list[index] = list[targetIndex];
+      list[targetIndex] = temp;
+
+      return { ...prev, vacancies: list };
+    });
+  };
+
   const updateFleetItem = (id: string, updated: Partial<FleetItem>) => {
     setSiteData((prev) => ({
       ...prev,
@@ -374,6 +504,22 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       ...prev,
       fleet: prev.fleet.filter((f) => f.id !== id),
     }));
+  };
+
+  const moveFleetItem = (id: string, direction: "up" | "down") => {
+    setSiteData((prev) => {
+      const list = [...prev.fleet];
+      const index = list.findIndex((item) => item.id === id);
+      if (index === -1) return prev;
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= list.length) return prev;
+
+      const temp = list[index];
+      list[index] = list[targetIndex];
+      list[targetIndex] = temp;
+
+      return { ...prev, fleet: list };
+    });
   };
 
   const updateGeneralInfo = (info: Partial<GeneralInfo>) => {
@@ -413,6 +559,35 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }));
   };
 
+  const moveCustomSection = (id: string, direction: "up" | "down") => {
+    setSiteData((prev) => {
+      const sections = [...prev.customSections].sort((a, b) => (a.order || 0) - (b.order || 0));
+      const index = sections.findIndex((s) => s.id === id);
+      if (index === -1) return prev;
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= sections.length) return prev;
+
+      const temp = sections[index];
+      sections[index] = sections[targetIndex];
+      sections[targetIndex] = temp;
+
+      const updated = sections.map((s, idx) => ({ ...s, order: idx + 1 }));
+      return { ...prev, customSections: updated };
+    });
+  };
+
+  const setVacancies = (vacancies: Vacancy[]) => {
+    setSiteData((prev) => ({ ...prev, vacancies }));
+  };
+
+  const setFleet = (fleet: FleetItem[]) => {
+    setSiteData((prev) => ({ ...prev, fleet }));
+  };
+
+  const setCustomSections = (customSections: CustomSection[]) => {
+    setSiteData((prev) => ({ ...prev, customSections }));
+  };
+
   const setAdminPin = (pin: string) => {
     setSiteData((prev) => ({ ...prev, adminPin: pin }));
   };
@@ -434,14 +609,20 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         updateVacancy,
         addVacancy,
         deleteVacancy,
+        moveVacancy,
+        setVacancies,
         updateFleetItem,
         addFleetItem,
         deleteFleetItem,
+        moveFleetItem,
+        setFleet,
         updateGeneralInfo,
         updateBranding,
         addCustomSection,
         updateCustomSection,
         deleteCustomSection,
+        moveCustomSection,
+        setCustomSections,
         setAdminPin,
         resetToDefaults,
         importData,

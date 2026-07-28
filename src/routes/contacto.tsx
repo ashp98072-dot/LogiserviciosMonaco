@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Phone, Mail, MapPin, Send, MessageCircle } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
 import { useSiteData } from "@/context/SiteDataContext";
+import DynamicSections from "@/components/DynamicSections";
 
 export const Route = createFileRoute("/contacto")({
   head: () => ({
@@ -51,8 +52,8 @@ function Page() {
           ))}
         </div>
 
-        <form action="https://formspree.io/f/xzdndgdq" method="POST" className="md:col-span-2 rounded-xl border border-border bg-card p-6 md:p-8 shadow-elegant space-y-4">
-          <h2 className="text-2xl font-bold">Solicita tu cotización</h2>
+        <form action={contact.formspreeUrl || "https://formspree.io/f/xzdndgdq"} method="POST" className="md:col-span-2 rounded-xl border border-border bg-card p-6 md:p-8 shadow-elegant space-y-4">
+          <h2 className="text-2xl font-bold">{contact.formTitle || "Solicita tu cotización"}</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <Field label="Nombre" name="nombre" required />
             <Field label="Empresa" name="empresa" />
@@ -72,6 +73,8 @@ function Page() {
           </button>
         </form>
       </section>
+
+      <DynamicSections page="contacto" />
     </SiteLayout>
   );
 }

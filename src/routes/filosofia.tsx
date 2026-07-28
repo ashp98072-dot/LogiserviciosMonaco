@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Target, Eye, Sparkles, ShieldCheck, HeartHandshake, Compass, Award, ArrowRight, CheckCircle2, RotateCcw, Truck, Users } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
+import DynamicSections from "@/components/DynamicSections";
 
 export const Route = createFileRoute("/filosofia")({
   head: () => ({
@@ -260,6 +261,8 @@ function Page() {
           </div>
         </div>
       </section>
+
+      <DynamicSections page="quienes-somos" />
     </SiteLayout>
   );
 }
