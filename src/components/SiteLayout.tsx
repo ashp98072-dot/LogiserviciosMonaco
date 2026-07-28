@@ -77,9 +77,6 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
               <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-accent flex items-center gap-2">
                 <Facebook className="h-4 w-4" /> Facebook
               </a>
-              <Link to="/admin" onClick={() => setOpen(false)} className="px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-accent flex items-center gap-2">
-                <Lock className="h-4 w-4" /> Panel Admin CMS
-              </Link>
             </div>
           </div>
         )}
@@ -113,11 +110,6 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
               {nav.map((n) => (
                 <li key={n.to}><Link to={n.to} className="hover:text-gold">{n.label}</Link></li>
               ))}
-              <li>
-                <Link to="/admin" className="hover:text-gold text-primary-foreground/50 inline-flex items-center gap-1 text-xs mt-2">
-                  <Lock className="h-3 w-3" /> Panel Admin (CMS)
-                </Link>
-              </li>
             </ul>
           </div>
           <div>
