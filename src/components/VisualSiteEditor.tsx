@@ -947,6 +947,72 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
                       className="w-full px-3 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white"
                     />
                   </div>
+
+                  {/* MAP CONFIGURATION CONTROLS */}
+                  <div className="pt-2 border-t border-neutral-800 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-bold text-amber-400 flex items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5" /> Mostrar Mapa Interactivo
+                      </label>
+                      <input
+                        type="checkbox"
+                        checked={siteData.contactInfo.showMap !== false}
+                        onChange={(e) => updateContactInfo({ showMap: e.target.checked })}
+                        className="h-4 w-4 rounded bg-neutral-800 border-neutral-700 text-amber-500 focus:ring-0 cursor-pointer"
+                      />
+                    </div>
+
+                    {siteData.contactInfo.showMap !== false && (
+                      <>
+                        <div>
+                          <label className="block text-[11px] font-semibold text-neutral-400 mb-1">
+                            Ubicación / Posición del Mapa
+                          </label>
+                          <select
+                            value={siteData.contactInfo.mapPosition || "bottom"}
+                            onChange={(e) => updateContactInfo({ mapPosition: e.target.value as any })}
+                            className="w-full px-3 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white text-xs font-semibold"
+                          >
+                            <option value="bottom">👇 Abajo del Formulario (Ancho Completo)</option>
+                            <option value="top">👆 Arriba del Formulario (Ancho Completo)</option>
+                            <option value="sidebar">👉 En Columna Lateral (Bajo Datos de Contacto)</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold text-neutral-400 mb-1">
+                            Altura del Mapa
+                          </label>
+                          <select
+                            value={siteData.contactInfo.mapHeight || "350px"}
+                            onChange={(e) => updateContactInfo({ mapHeight: e.target.value })}
+                            className="w-full px-3 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white text-xs"
+                          >
+                            <option value="250px">Compacto (250px)</option>
+                            <option value="350px">Estándar (350px)</option>
+                            <option value="450px">Grande (450px)</option>
+                            <option value="550px">Súper Amplio (550px)</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold text-neutral-400 mb-1">
+                            URL de Insertar Mapa de Google Maps (iFrame / Embed)
+                          </label>
+                          <input
+                            type="text"
+                            value={siteData.contactInfo.mapEmbedUrl || ""}
+                            placeholder="https://www.google.com/maps/embed?..."
+                            onChange={(e) => updateContactInfo({ mapEmbedUrl: e.target.value })}
+                            className="w-full px-3 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white font-mono text-[10px]"
+                          />
+                          <p className="text-[10px] text-neutral-500 mt-1">
+                            Obtén este enlace en Google Maps: Compartir &gt; Insertar un mapa &gt; copiar el atributo src de la etiqueta iframe.
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -1600,6 +1666,37 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
                   <p className="text-xs text-muted-foreground">Cuéntanos sobre tu operación y te enviaremos una propuesta a la medida.</p>
                 </div>
 
+                {/* Map on Top */}
+                {siteData.contactInfo.showMap !== false && (siteData.contactInfo.mapPosition === "top") && (
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveSectionId("contact");
+                      showNotification("✏️ Configura la posición y URL del mapa en el panel lateral");
+                    }}
+                    className="rounded-2xl overflow-hidden border border-border shadow-md bg-card cursor-pointer group hover:border-gold transition relative"
+                  >
+                    <div className="p-3 bg-muted/60 border-b border-border flex items-center justify-between">
+                      <span className="text-xs font-bold flex items-center gap-1.5 text-foreground">
+                        <MapPin className="h-4 w-4 text-gold" /> Ubicación en Google Maps ({siteData.contactInfo.address || "Guatemala"})
+                      </span>
+                      <span className="text-[10px] font-bold text-amber-500 opacity-0 group-hover:opacity-100 transition">
+                        ✏️ Editar Posición del Mapa
+                      </span>
+                    </div>
+                    <iframe
+                      src={siteData.contactInfo.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt"}
+                      width="100%"
+                      height={siteData.contactInfo.mapHeight || "350px"}
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      title="Ubicación en Google Maps"
+                      className="w-full pointer-events-none"
+                    />
+                  </div>
+                )}
+
                 <div className="grid md:grid-cols-3 gap-8">
                   {/* Contact Cards Column */}
                   <div
@@ -1623,6 +1720,37 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
                       <p className="text-xs"><strong>WhatsApp RRHH:</strong> +{siteData.contactInfo.whatsappRRHH}</p>
                       <p className="text-xs"><strong>Correo CV:</strong> {siteData.contactInfo.emailRRHH}</p>
                     </div>
+
+                    {/* Map in Sidebar */}
+                    {siteData.contactInfo.showMap !== false && siteData.contactInfo.mapPosition === "sidebar" && (
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveSectionId("contact");
+                          showNotification("✏️ Configura la posición y URL del mapa en el panel lateral");
+                        }}
+                        className="rounded-2xl overflow-hidden border border-border shadow-md bg-card cursor-pointer group hover:border-gold transition relative"
+                      >
+                        <div className="p-3 bg-muted/60 border-b border-border flex items-center justify-between">
+                          <span className="text-xs font-bold flex items-center gap-1.5 text-foreground">
+                            <MapPin className="h-4 w-4 text-gold" /> Ubicación
+                          </span>
+                          <span className="text-[10px] font-bold text-amber-500 opacity-0 group-hover:opacity-100 transition">
+                            ✏️ Editar Mapa
+                          </span>
+                        </div>
+                        <iframe
+                          src={siteData.contactInfo.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt"}
+                          width="100%"
+                          height={siteData.contactInfo.mapHeight || "300px"}
+                          style={{ border: 0 }}
+                          allowFullScreen
+                          loading="lazy"
+                          title="Ubicación en Google Maps"
+                          className="w-full pointer-events-none"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Contact & Quotation Form */}
@@ -1675,6 +1803,37 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
                     </button>
                   </form>
                 </div>
+
+                {/* Map on Bottom */}
+                {siteData.contactInfo.showMap !== false && (siteData.contactInfo.mapPosition === "bottom" || !siteData.contactInfo.mapPosition) && (
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveSectionId("contact");
+                      showNotification("✏️ Configura la posición y URL del mapa en el panel lateral");
+                    }}
+                    className="rounded-2xl overflow-hidden border border-border shadow-md bg-card cursor-pointer group hover:border-gold transition relative"
+                  >
+                    <div className="p-3 bg-muted/60 border-b border-border flex items-center justify-between">
+                      <span className="text-xs font-bold flex items-center gap-1.5 text-foreground">
+                        <MapPin className="h-4 w-4 text-gold" /> Ubicación en Google Maps ({siteData.contactInfo.address || "Guatemala"})
+                      </span>
+                      <span className="text-[10px] font-bold text-amber-500 opacity-0 group-hover:opacity-100 transition">
+                        ✏️ Editar Ubicación / Posición del Mapa
+                      </span>
+                    </div>
+                    <iframe
+                      src={siteData.contactInfo.mapEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt"}
+                      width="100%"
+                      height={siteData.contactInfo.mapHeight || "350px"}
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      title="Ubicación en Google Maps"
+                      className="w-full pointer-events-none"
+                    />
+                  </div>
+                )}
 
                 <DynamicSections
                   page="contacto"
