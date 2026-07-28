@@ -28,6 +28,8 @@ import {
   AlignLeft,
   AlignCenter,
   LayoutGrid,
+  Download,
+  Upload,
 } from "lucide-react";
 
 // Components for live preview rendering
@@ -41,6 +43,10 @@ interface VisualSiteEditorProps {
 export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps) {
   const {
     siteData,
+    isSyncing,
+    lastSyncedAt,
+    syncWithServer,
+    exportData,
     updateContactInfo,
     updateGeneralInfo,
     updateBranding,
@@ -168,6 +174,52 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
             <option value="filosofia">🏛️ Filosofía Empresarial</option>
             <option value="contacto">📞 Contacto & Ubicación</option>
           </select>
+        </div>
+
+        {/* Global Server Sync & Save Panel */}
+        <div className="p-3 bg-neutral-900 border-b border-neutral-800 space-y-2">
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="font-bold text-white flex items-center gap-1.5">
+              <span className={`h-2.5 w-2.5 rounded-full ${isSyncing ? "bg-amber-400 animate-ping" : "bg-emerald-400"}`}></span>
+              {isSyncing ? "Guardando en Servidor..." : "Servidor Sincronizado"}
+            </span>
+            {lastSyncedAt && (
+              <span className="text-[10px] text-neutral-400">
+                Último: {lastSyncedAt}
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={async () => {
+                showNotification("⏳ Guardando imágenes y textos en el servidor...");
+                const ok = await syncWithServer();
+                if (ok) {
+                  showNotification("✨ ¡Guardado Globalmente! Todos los dispositivos verán tus imágenes y cambios");
+                } else {
+                  showNotification("⚠️ Guardado localmente");
+                }
+              }}
+              className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-xs cursor-pointer"
+            >
+              <Save className="h-3.5 w-3.5" />
+              <span>Guardar Global</span>
+            </button>
+
+            <button
+              onClick={exportData}
+              className="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+              title="Descargar copia de seguridad en archivo JSON"
+            >
+              <Download className="h-3.5 w-3.5 text-neutral-400" />
+              <span>Backup JSON</span>
+            </button>
+          </div>
+
+          <p className="text-[10px] text-emerald-400/90 leading-tight bg-emerald-950/40 p-2 rounded border border-emerald-800/50">
+            🌐 <strong>Sincronización activa:</strong> Cualquier cambio o imagen que subas aquí se guardará en el servidor. Al ingresar desde otros dispositivos (celulares, tablets o PCs), todos verán exactamente tus imágenes y textos actualizados.
+          </p>
         </div>
 
         {/* Accordions Container */}
@@ -1685,7 +1737,7 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
                       </span>
                     </div>
                     <iframe
-                      src={extractMapUrl(siteData.contactInfo.mapEmbedUrl) || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt"}
+                      src={extractMapUrl(siteData.contactInfo.mapEmbedUrl) || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.559631403319!2d-90.55295749999999!3d14.567157199999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a11b33260bfb%3A0x55b9abd2a7a13cf4!2sColonia%20La%20Colina!5e0!3m2!1ses-419!2sgt!4v1785247597819!5m2!1ses-419!2sgt"}
                       width="100%"
                       height={siteData.contactInfo.mapHeight || "350px"}
                       style={{ border: 0 }}
@@ -1740,7 +1792,7 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
                           </span>
                         </div>
                         <iframe
-                          src={extractMapUrl(siteData.contactInfo.mapEmbedUrl) || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt"}
+                          src={extractMapUrl(siteData.contactInfo.mapEmbedUrl) || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.559631403319!2d-90.55295749999999!3d14.567157199999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a11b33260bfb%3A0x55b9abd2a7a13cf4!2sColonia%20La%20Colina!5e0!3m2!1ses-419!2sgt!4v1785247597819!5m2!1ses-419!2sgt"}
                           width="100%"
                           height={siteData.contactInfo.mapHeight || "300px"}
                           style={{ border: 0 }}
@@ -1823,7 +1875,7 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
                       </span>
                     </div>
                     <iframe
-                      src={extractMapUrl(siteData.contactInfo.mapEmbedUrl) || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.423985108253!2d-90.5367!3d14.575!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a3f25c78278b%3A0x6bd6c666f0e4b868!2sCalzada%20Atanasio%20Tzul%2C%20Ciudad%20de%20Guatemala!5e0!3m2!1ses!2sgt!4v1710000000000!5m2!1ses!2sgt"}
+                      src={extractMapUrl(siteData.contactInfo.mapEmbedUrl) || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.559631403319!2d-90.55295749999999!3d14.567157199999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a11b33260bfb%3A0x55b9abd2a7a13cf4!2sColonia%20La%20Colina!5e0!3m2!1ses-419!2sgt!4v1785247597819!5m2!1ses-419!2sgt"}
                       width="100%"
                       height={siteData.contactInfo.mapHeight || "350px"}
                       style={{ border: 0 }}

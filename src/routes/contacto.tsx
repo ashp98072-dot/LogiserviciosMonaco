@@ -105,10 +105,10 @@ function MapComponent({ contact }: { contact: any }) {
     <div className="rounded-xl overflow-hidden border border-border shadow-card bg-card">
       <div className="p-3 bg-muted/40 border-b border-border flex items-center justify-between">
         <span className="text-xs font-bold flex items-center gap-1.5 text-foreground">
-          <MapPin className="h-4 w-4 text-gold" /> Ubicación: {contact.address || "Calzada Atanasio Tzul, Guatemala"}
+          <MapPin className="h-4 w-4 text-gold" /> Ubicación: {contact.address || "17 Ave. 45-35, Avenida Petapa, Zona 12, Ciudad de Guatemala, Guatemala"}
         </span>
         <a
-          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contact.address || "Calzada Atanasio Tzul, Guatemala")}`}
+          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contact.address || "17 Ave. 45-35, Avenida Petapa, Zona 12, Ciudad de Guatemala, Guatemala")}`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-[11px] font-semibold text-primary hover:underline"

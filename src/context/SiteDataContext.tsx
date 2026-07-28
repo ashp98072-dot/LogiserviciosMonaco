@@ -161,7 +161,7 @@ const DEFAULT_CONTACT_INFO: ContactInfo = {
   whatsappRRHH: "50230137849",
   emailInfo: "info@logiserviciosmonaco.com",
   emailRRHH: "recursoshumanos@logiserviciosmonaco.com",
-  address: "Calzada Atanasio Tzul 22-00 Zona 12, Empresarial el Cortijo II, Bodega 403, Guatemala",
+  address: "17 Ave. 45-35, Avenida Petapa, Zona 12, Ciudad de Guatemala, Guatemala",
   facebookUrl: "https://www.facebook.com/share/1CirGxQ8no/",
   schedule: "Lunes a Viernes: 8:00 AM - 5:00 PM | Sábados: 8:00 AM - 12:00 PM",
   formTitle: "Solicita tu cotización",
@@ -389,6 +389,10 @@ const DEFAULT_SITE_DATA: SiteData = {
 
 interface SiteDataContextType {
   siteData: SiteData;
+  isSyncing: boolean;
+  lastSyncedAt: string | null;
+  syncWithServer: (customData?: SiteData) => Promise<boolean>;
+  exportData: () => void;
   updateContactInfo: (info: Partial<ContactInfo>) => void;
   updateVacancy: (id: string, updated: Partial<Vacancy>) => void;
   addVacancy: (vacancy: Omit<Vacancy, "id">) => void;
@@ -427,6 +431,9 @@ export function extractMapUrl(input: string | undefined): string {
 const LOCAL_STORAGE_KEY = "logiservicios_monaco_cms_data_v1";
 
 export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
+
   const [siteData, setSiteData] = useState<SiteData>(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -446,17 +453,86 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         };
       }
     } catch (e) {
-      console.error("Error loading saved site data:", e);
+      console.error("Error loading saved site data from localStorage:", e);
     }
     return DEFAULT_SITE_DATA;
   });
 
+  // Fetch from server on load so ALL devices share the same configuration
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchServerData() {
+      try {
+        const res = await fetch("/api/site-data");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            const serverData = json.data;
+            const contact = { ...DEFAULT_CONTACT_INFO, ...serverData.contactInfo };
+            if (contact.mapEmbedUrl) {
+              contact.mapEmbedUrl = extractMapUrl(contact.mapEmbedUrl);
+            }
+            const merged: SiteData = {
+              ...DEFAULT_SITE_DATA,
+              ...serverData,
+              contactInfo: contact,
+              generalInfo: { ...DEFAULT_GENERAL_INFO, ...serverData.generalInfo },
+              branding: { ...DEFAULT_BRANDING, ...serverData.branding },
+              customSections: serverData.customSections || DEFAULT_CUSTOM_SECTIONS,
+            };
+            if (isMounted) {
+              setSiteData(merged);
+              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
+              setLastSyncedAt(new Date().toLocaleTimeString());
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load from /api/site-data, using local cache.", err);
+      }
+    }
+    fetchServerData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Save to server API function
+  const syncWithServer = async (customData?: SiteData): Promise<boolean> => {
+    const dataToSave = customData || siteData;
+    setIsSyncing(true);
+    try {
+      const res = await fetch("/api/site-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataToSave),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setLastSyncedAt(new Date().toLocaleTimeString());
+        setIsSyncing(false);
+        return true;
+      }
+    } catch (err) {
+      console.error("Error saving to server API:", err);
+    }
+    setIsSyncing(false);
+    return false;
+  };
+
+  // Sync to localStorage immediately & server with debounce
   useEffect(() => {
     try {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(siteData));
     } catch (e) {
       console.error("Error saving site data to localStorage:", e);
     }
+
+    const timer = setTimeout(() => {
+      syncWithServer(siteData);
+    }, 1500);
+
+    return () => clearTimeout(timer);
   }, [siteData]);
 
   const updateContactInfo = (info: Partial<ContactInfo>) => {
@@ -623,14 +699,29 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.removeItem(LOCAL_STORAGE_KEY);
   };
 
+  const exportData = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(siteData, null, 2));
+    const downloadAnchor = document.createElement("a");
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `logiservicios_monaco_backup_${new Date().toISOString().slice(0, 10)}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
   const importData = (data: SiteData) => {
     setSiteData(data);
+    syncWithServer(data);
   };
 
   return (
     <SiteDataContext.Provider
       value={{
         siteData,
+        isSyncing,
+        lastSyncedAt,
+        syncWithServer,
+        exportData,
         updateContactInfo,
         updateVacancy,
         addVacancy,

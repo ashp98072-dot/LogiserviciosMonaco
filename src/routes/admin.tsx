@@ -108,7 +108,7 @@ function AdminPage() {
       setIsAuthenticated(true);
       setLoginError("");
     } else {
-      setLoginError("PIN o Contraseña incorrecta. (Prueba con 1234)");
+      setLoginError("PIN o Contraseña incorrecta.");
     }
   };
 
@@ -136,7 +136,7 @@ function AdminPage() {
                   type="password"
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value)}
-                  placeholder="Ingrese el PIN (por defecto 1234)"
+                  placeholder="Ingrese el PIN de acceso"
                   className="w-full px-4 py-2.5 rounded-lg border border-input bg-background text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary text-sm"
                   autoFocus
                 />
@@ -153,7 +153,7 @@ function AdminPage() {
             </form>
 
             <div className="mt-6 text-center text-xs text-muted-foreground">
-              <p>PIN por defecto: <code className="bg-muted px-1.5 py-0.5 rounded text-foreground font-mono">1234</code></p>
+              <p>Acceso restringido únicamente para personal autorizado.</p>
             </div>
           </div>
         </div>
