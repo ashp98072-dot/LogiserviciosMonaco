@@ -170,7 +170,6 @@ const DEFAULT_VACANCIES: Vacancy[] = [
     title: "Piloto de Cabezales",
     location: "Ciudad de Guatemala, Zona 12 (Petapa)",
     license: "Licencia Tipo A vigente",
-    salary: "Q8,000.00 / mes",
     flyerImage: pilotoCabezalesFlyer,
     subjectEmail: "Piloto cabezal",
     whatsappNumber: "50230137849",
@@ -184,7 +183,6 @@ const DEFAULT_VACANCIES: Vacancy[] = [
       "Residir en La Petapa, Ciudad de Guatemala o alrededores",
     ],
     offers: [
-      "Salario mensual de Q8,000.00",
       "Estabilidad laboral",
       "Viáticos",
       "Prestaciones laborales completas",
@@ -197,7 +195,6 @@ const DEFAULT_VACANCIES: Vacancy[] = [
     title: "Piloto de 5 a 8 Toneladas",
     location: "Ciudad de Guatemala, Zona 12 (Petapa)",
     license: "Licencia Tipo A o B vigente",
-    salary: "Q4,500.00 / mes",
     flyerImage: piloto5TonFlyer,
     subjectEmail: "Piloto 5 a 8 Toneladas",
     whatsappNumber: "50230137849",
@@ -211,7 +208,6 @@ const DEFAULT_VACANCIES: Vacancy[] = [
       "Residir en La Petapa, Ciudad de Guatemala o alrededores",
     ],
     offers: [
-      "Salario mensual de Q4,500.00",
       "Estabilidad laboral",
       "Viáticos",
       "Prestaciones de ley",
@@ -224,7 +220,6 @@ const DEFAULT_VACANCIES: Vacancy[] = [
     title: "Piloto de 10 a 12 Toneladas",
     location: "Ciudad de Guatemala, Zona 12 (Petapa)",
     license: "Licencia Tipo A o B vigente",
-    salary: "Q5,500.00 / mes",
     flyerImage: piloto10TonFlyer,
     subjectEmail: "Piloto 10 a 12 Toneladas",
     whatsappNumber: "50230137849",
@@ -238,7 +233,6 @@ const DEFAULT_VACANCIES: Vacancy[] = [
       "Residir cerca de Petapa, Zona 12 o alrededores",
     ],
     offers: [
-      "Salario mensual de Q5,500.00",
       "Estabilidad laboral",
       "Viáticos",
       "Prestaciones de ley",
