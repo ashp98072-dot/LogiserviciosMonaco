@@ -170,6 +170,7 @@ const DEFAULT_VACANCIES: Vacancy[] = [
     title: "Piloto de Cabezales",
     location: "Ciudad de Guatemala, Zona 12 (Petapa)",
     license: "Licencia Tipo A vigente",
+    salary: "Q8,000.00 / mes",
     flyerImage: pilotoCabezalesFlyer,
     subjectEmail: "Piloto cabezal",
     whatsappNumber: "50230137849",
@@ -183,6 +184,7 @@ const DEFAULT_VACANCIES: Vacancy[] = [
       "Residir en La Petapa, Ciudad de Guatemala o alrededores",
     ],
     offers: [
+      "Salario mensual de Q8,000.00",
       "Estabilidad laboral",
       "Viáticos",
       "Prestaciones laborales completas",
@@ -195,6 +197,7 @@ const DEFAULT_VACANCIES: Vacancy[] = [
     title: "Piloto de 5 a 8 Toneladas",
     location: "Ciudad de Guatemala, Zona 12 (Petapa)",
     license: "Licencia Tipo A o B vigente",
+    salary: "Q4,500.00 / mes",
     flyerImage: piloto5TonFlyer,
     subjectEmail: "Piloto 5 a 8 Toneladas",
     whatsappNumber: "50230137849",
@@ -208,6 +211,7 @@ const DEFAULT_VACANCIES: Vacancy[] = [
       "Residir en La Petapa, Ciudad de Guatemala o alrededores",
     ],
     offers: [
+      "Salario mensual de Q4,500.00",
       "Estabilidad laboral",
       "Viáticos",
       "Prestaciones de ley",
@@ -220,6 +224,7 @@ const DEFAULT_VACANCIES: Vacancy[] = [
     title: "Piloto de 10 a 12 Toneladas",
     location: "Ciudad de Guatemala, Zona 12 (Petapa)",
     license: "Licencia Tipo A o B vigente",
+    salary: "Q5,500.00 / mes",
     flyerImage: piloto10TonFlyer,
     subjectEmail: "Piloto 10 a 12 Toneladas",
     whatsappNumber: "50230137849",
@@ -233,6 +238,7 @@ const DEFAULT_VACANCIES: Vacancy[] = [
       "Residir cerca de Petapa, Zona 12 o alrededores",
     ],
     offers: [
+      "Salario mensual de Q5,500.00",
       "Estabilidad laboral",
       "Viáticos",
       "Prestaciones de ley",
@@ -397,7 +403,7 @@ function sanitizeCustomSections(sections: CustomSection[] | undefined): CustomSe
   return sections.filter((s) => s.id !== "sec-1" && !s.title?.includes("Garantía de Calidad") && !s.subtitle?.includes("Ventaja Competitiva"));
 }
 
-const LOCAL_STORAGE_KEY = "logiservicios_monaco_cms_data_v1";
+const LOCAL_STORAGE_KEY = "logiservicios_monaco_cms_data_v2";
 const GITHUB_CONFIG_KEY = "logiservicios_monaco_github_config_v1";
 
 const DEFAULT_GITHUB_CONFIG: GitHubSyncConfig = {
@@ -512,6 +518,9 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const [siteData, setSiteData] = useState<SiteData>(() => {
     try {
+      // Clear legacy storage v1 to prevent stale data retention on old devices
+      localStorage.removeItem("logiservicios_monaco_cms_data_v1");
+
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -535,50 +544,106 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return DEFAULT_SITE_DATA;
   });
 
-  // Fetch from server on load so ALL devices share the same configuration
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchServerData() {
+  // Helper to fetch live fresh data from GitHub raw or site static endpoints with cache-busting
+  const fetchFreshDataFromCloud = async (): Promise<SiteData | null> => {
+    const timestamp = Date.now();
+    const repo = githubConfig.repo || "laulaisha8/logiserviciosmonaco";
+    const branch = githubConfig.branch || "main";
+    const cleanRepo = repo.replace("https://github.com/", "").replace(".git", "").replace(/^\/+|\/+$/g, "").trim();
+
+    const endpoints = [
+      `https://raw.githubusercontent.com/${cleanRepo}/${branch}/site-data.json?cache_bust=${timestamp}`,
+      `/site-data.json?cache_bust=${timestamp}`,
+      `/api/site-data?cache_bust=${timestamp}`,
+    ];
+
+    for (const url of endpoints) {
       try {
-        const res = await fetch("/api/site-data");
-        const contentType = res.headers.get("content-type") || "";
-        if (res.ok && contentType.includes("application/json")) {
-          const json = await res.json();
-          if (json.success && json.data) {
-            const serverData = json.data;
-            const contact = { ...DEFAULT_CONTACT_INFO, ...serverData.contactInfo };
-            if (contact.mapEmbedUrl) {
-              contact.mapEmbedUrl = extractMapUrl(contact.mapEmbedUrl);
+        const res = await fetch(url, {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+          },
+        });
+        if (res.ok) {
+          const contentType = res.headers.get("content-type") || "";
+          let dataJson: any = null;
+          if (contentType.includes("application/json") || url.endsWith(".json") || url.includes("raw.githubusercontent.com")) {
+            const text = await res.text();
+            try {
+              dataJson = JSON.parse(text);
+            } catch (e) {
+              continue;
             }
-            const merged: SiteData = {
-              ...DEFAULT_SITE_DATA,
-              ...serverData,
-              contactInfo: contact,
-              fleet: sanitizeFleetImages(serverData.fleet || DEFAULT_FLEET),
-              generalInfo: { ...DEFAULT_GENERAL_INFO, ...serverData.generalInfo },
-              branding: { ...DEFAULT_BRANDING, ...serverData.branding },
-              customSections: sanitizeCustomSections(serverData.customSections || DEFAULT_CUSTOM_SECTIONS),
-            };
-            if (isMounted) {
-              setSiteData(merged);
-              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
-              setLastSyncedAt(new Date().toLocaleTimeString());
+          }
+          if (dataJson) {
+            const rawData = dataJson.data || dataJson;
+            if (rawData && typeof rawData === "object" && (rawData.contactInfo || rawData.vacancies || rawData.fleet)) {
+              const contact = { ...DEFAULT_CONTACT_INFO, ...rawData.contactInfo };
+              if (contact.mapEmbedUrl) {
+                contact.mapEmbedUrl = extractMapUrl(contact.mapEmbedUrl);
+              }
+              return {
+                ...DEFAULT_SITE_DATA,
+                ...rawData,
+                contactInfo: contact,
+                fleet: sanitizeFleetImages(rawData.fleet || DEFAULT_FLEET),
+                generalInfo: { ...DEFAULT_GENERAL_INFO, ...rawData.generalInfo },
+                branding: { ...DEFAULT_BRANDING, ...rawData.branding },
+                customSections: sanitizeCustomSections(rawData.customSections || DEFAULT_CUSTOM_SECTIONS),
+              };
             }
           }
         }
-      } catch (err) {
-        // Silently fallback to local default data on static servers
-      } finally {
-        if (isMounted) {
-          setIsInitialized(true);
-        }
+      } catch (e) {
+        // Try next endpoint
       }
     }
-    fetchServerData();
+    return null;
+  };
+
+  // Fetch from server / GitHub on load and poll periodically so ALL devices stay synchronized in real time
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadLiveData() {
+      const liveData = await fetchFreshDataFromCloud();
+      if (liveData && isMounted) {
+        setSiteData((prev) => {
+          // If live data differs from current state, update state and overwrite local storage
+          const prevStr = JSON.stringify(prev);
+          const liveStr = JSON.stringify(liveData);
+          if (prevStr !== liveStr) {
+            localStorage.setItem(LOCAL_STORAGE_KEY, liveStr);
+            setLastSyncedAt(new Date().toLocaleTimeString());
+            return liveData;
+          }
+          return prev;
+        });
+      }
+      if (isMounted) {
+        setIsInitialized(true);
+      }
+    }
+
+    loadLiveData();
+
+    // Poll every 5 seconds for real-time live synchronization across devices
+    const intervalId = setInterval(loadLiveData, 5000);
+
+    // Also re-fetch immediately when user returns to window/tab
+    const handleFocus = () => {
+      loadLiveData();
+    };
+    window.addEventListener("focus", handleFocus);
+
     return () => {
       isMounted = false;
+      clearInterval(intervalId);
+      window.removeEventListener("focus", handleFocus);
     };
-  }, []);
+  }, [githubConfig.repo, githubConfig.branch]);
 
   // Save to server API function
   const syncWithServer = async (customData?: SiteData): Promise<boolean> => {

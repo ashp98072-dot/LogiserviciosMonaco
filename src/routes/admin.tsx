@@ -1197,7 +1197,7 @@ function AdminPage() {
                       title: "Nueva Plaza de Empleo",
                       location: "Ciudad de Guatemala, Zona 12",
                       license: "Licencia Tipo A o B",
-                      salary: "Q5,000.00 / mes",
+                      salary: "",
                       flyerImage: "",
                       subjectEmail: "Aplicación de empleo",
                       whatsappNumber: siteData.contactInfo.whatsappRRHH || "50230137849",

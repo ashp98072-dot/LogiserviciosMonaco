@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Send, Briefcase, Mail, MapPin, Award, CheckCircle2, DollarSign, Calendar, MessageCircle, Eye, X, Sparkles } from "lucide-react";
+import { Send, Briefcase, Mail, MapPin, Award, CheckCircle2, Calendar, MessageCircle, Eye, X, Sparkles } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
 import { useSiteData, Vacancy } from "@/context/SiteDataContext";
 import DynamicSections from "@/components/DynamicSections";
@@ -138,10 +138,6 @@ function Page() {
                       <div className="flex items-start gap-2">
                         <Award className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                         <span><strong>Requisito:</strong> {vacancy.license}</span>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                        <span><strong>Ofrecemos:</strong> {vacancy.salary}</span>
                       </div>
                     </div>
 

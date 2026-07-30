@@ -19,6 +19,14 @@ async function startServer() {
 
   let inMemoryData: any = null;
 
+  // Anti-cache middleware to ensure browsers always get the latest HTML and data on redeploy
+  app.use((req, res, next) => {
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    next();
+  });
+
   // API endpoint to GET site data
   app.get("/api/site-data", (req, res) => {
     try {
