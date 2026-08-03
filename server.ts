@@ -64,9 +64,16 @@ async function startServer() {
   });
 
   app.get("/api/publish-status", (_req, res) => {
+    const hasToken = Boolean(process.env.GITHUB_TOKEN?.trim());
     res.json({
-      serverPublish: Boolean(process.env.GITHUB_TOKEN),
+      serverPublish: hasToken,
       autoSync: true,
+      configured: {
+        GITHUB_TOKEN: hasToken,
+        GITHUB_REPO: Boolean(process.env.GITHUB_REPO?.trim()),
+        GITHUB_BRANCH: Boolean(process.env.GITHUB_BRANCH?.trim()),
+        CMS_ADMIN_PIN: Boolean(process.env.CMS_ADMIN_PIN?.trim()),
+      },
     });
   });
 

@@ -340,6 +340,7 @@ interface SiteDataContextType {
   lastGitHubPublishedAt: string | null;
   serverPublishAvailable: boolean;
   canPublishGlobally: boolean;
+  publishConfigStatus: Record<string, boolean> | null;
   exportData: () => void;
   updateContactInfo: (info: Partial<ContactInfo>) => void;
   updateVacancy: (id: string, updated: Partial<Vacancy>) => void;
@@ -557,6 +558,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
   const githubSyncInFlightRef = useRef(false);
   const [serverPublishAvailable, setServerPublishAvailable] = useState(false);
+  const [publishConfigStatus, setPublishConfigStatus] = useState<Record<string, boolean> | null>(null);
 
   const [githubConfig, setGithubConfig] = useState<GitHubSyncConfig>(() => {
     try {
@@ -861,6 +863,9 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (data && typeof data.serverPublish === "boolean") {
           setServerPublishAvailable(data.serverPublish);
         }
+        if (data?.configured && typeof data.configured === "object") {
+          setPublishConfigStatus(data.configured as Record<string, boolean>);
+        }
       })
       .catch(() => setServerPublishAvailable(false));
   }, []);
@@ -1142,6 +1147,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         lastGitHubPublishedAt,
         serverPublishAvailable,
         canPublishGlobally,
+        publishConfigStatus,
         exportData,
         updateContactInfo,
         updateVacancy,

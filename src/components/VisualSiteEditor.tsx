@@ -54,6 +54,7 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
     syncToGitHub,
     serverPublishAvailable,
     canPublishGlobally,
+    publishConfigStatus,
   } = useSiteData();
 
   // State for Customizer
@@ -209,7 +210,9 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
           <p className="text-[11px] text-neutral-300 leading-relaxed">
             {serverPublishAvailable
               ? "Todo lo que edites aquí se publica solo en logiserviciosmonaco.com. No necesitas configurar nada."
-              : "Los cambios se guardan en esta computadora. Pulsa el botón para publicarlos en el sitio web."}
+              : publishConfigStatus && !publishConfigStatus.GITHUB_TOKEN
+                ? "Falta configurar GITHUB_TOKEN en Vercel (Production) y hacer Redeploy. El administrador del sitio debe completar este paso."
+                : "Los cambios se guardan en esta computadora. Pulsa el botón para publicarlos en el sitio web."}
           </p>
 
           {(!serverPublishAvailable || hasUnpublishedChanges) && canPublishGlobally && (
