@@ -28,8 +28,6 @@ import {
   AlignLeft,
   AlignCenter,
   LayoutGrid,
-  Download,
-  Upload,
 } from "lucide-react";
 
 // Components for live preview rendering
@@ -46,8 +44,6 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
     isSyncing,
     lastSyncedAt,
     hasUnpublishedChanges,
-    syncWithServer,
-    exportData,
     updateContactInfo,
     updateGeneralInfo,
     updateBranding,
@@ -55,9 +51,9 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
     setFleet,
     setCustomSections,
     importData,
-    githubConfig,
-    updateGithubConfig,
     syncToGitHub,
+    serverPublishAvailable,
+    canPublishGlobally,
   } = useSiteData();
 
   // State for Customizer
@@ -69,7 +65,24 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [fleetTab, setFleetTab] = useState<"catalog" | "specs">("catalog");
-  const [showGithubSettings, setShowGithubSettings] = useState(!githubConfig.token);
+
+  const publishStatusLabel = isSyncing
+    ? "Publicando en el sitio web..."
+    : serverPublishAvailable
+      ? hasUnpublishedChanges
+        ? "Guardando cambios..."
+        : "Sitio web conectado"
+      : hasUnpublishedChanges
+        ? "Cambios pendientes de publicar"
+        : "Edición local";
+
+  const publishStatusColor = isSyncing
+    ? "bg-amber-400 animate-ping"
+    : serverPublishAvailable && !hasUnpublishedChanges
+      ? "bg-emerald-400"
+      : hasUnpublishedChanges
+        ? "bg-amber-400"
+        : "bg-neutral-500";
 
   // States for Editing Modals/Forms inside Customizer
   const [editingVacancy, setEditingVacancy] = useState<Vacancy | null>(null);
@@ -181,130 +194,43 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
           </select>
         </div>
 
-        {/* Global Server & GitHub Sync Panel */}
+        {/* Publicación al sitio web */}
         <div className="p-3 bg-neutral-900 border-b border-neutral-800 space-y-2">
-          <div className="flex items-center justify-between text-[11px]">
+          <div className="flex items-center justify-between text-[11px] gap-2">
             <span className="font-bold text-white flex items-center gap-1.5">
-              <span
-                className={`h-2.5 w-2.5 rounded-full ${
-                  isSyncing
-                    ? "bg-amber-400 animate-ping"
-                    : hasUnpublishedChanges
-                      ? "bg-amber-400"
-                      : githubConfig.token
-                        ? "bg-emerald-400"
-                        : "bg-neutral-500"
-                }`}
-              />
-              {isSyncing
-                ? "Publicando en GitHub..."
-                : hasUnpublishedChanges
-                  ? "Cambios sin publicar"
-                  : githubConfig.token
-                    ? "GitHub conectado"
-                    : "Configura GitHub para publicar"}
+              <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${publishStatusColor}`} />
+              {publishStatusLabel}
             </span>
             {lastSyncedAt && (
-              <span className="text-[10px] text-neutral-400">
-                Último: {lastSyncedAt}
-              </span>
+              <span className="text-[10px] text-neutral-400 shrink-0">Actualizado: {lastSyncedAt}</span>
             )}
           </div>
 
-          <div className="flex flex-col gap-1.5">
+          <p className="text-[11px] text-neutral-300 leading-relaxed">
+            {serverPublishAvailable
+              ? "Todo lo que edites aquí se publica solo en logiserviciosmonaco.com. No necesitas configurar nada."
+              : "Los cambios se guardan en esta computadora. Pulsa el botón para publicarlos en el sitio web."}
+          </p>
+
+          {(!serverPublishAvailable || hasUnpublishedChanges) && canPublishGlobally && (
             <button
               onClick={async () => {
-                if (!githubConfig.token) {
-                  setShowGithubSettings(true);
-                  showNotification("⚠️ Configura tu Token de GitHub abajo para publicar");
-                  return;
-                }
-                showNotification("⏳ Publicando cambios en tu repositorio de GitHub...");
+                showNotification("⏳ Publicando en el sitio web...");
                 const res = await syncToGitHub();
-                showNotification(res.success ? "🚀 ¡Publicado con éxito en GitHub!" : `❌ ${res.message}`);
+                showNotification(res.success ? "✅ ¡Sitio web actualizado!" : `❌ ${res.message}`);
               }}
-              className="w-full px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-md cursor-pointer"
+              disabled={isSyncing}
+              className="w-full px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-md"
             >
               <Save className="h-4 w-4" />
-              <span>🚀 Publicar Cambios en GitHub</span>
+              {isSyncing ? "Publicando..." : "Publicar en el sitio web ahora"}
             </button>
-
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={async () => {
-                  showNotification("⏳ Guardando en memoria local...");
-                  const ok = await syncWithServer();
-                  showNotification(ok ? "✨ Guardado en servidor local" : "✨ Guardado en este navegador");
-                }}
-                className="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-semibold text-[11px] flex items-center justify-center gap-1 transition cursor-pointer"
-              >
-                <Save className="h-3 w-3 text-emerald-400" />
-                <span>Guardar Local</span>
-              </button>
-
-              <button
-                onClick={() => setShowGithubSettings((v) => !v)}
-                className="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-semibold text-[11px] flex items-center justify-center gap-1 transition cursor-pointer"
-              >
-                <Sparkles className="h-3 w-3 text-gold" />
-                <span>{showGithubSettings ? "Ocultar GitHub" : "Config GitHub"}</span>
-              </button>
-            </div>
-          </div>
-
-          {showGithubSettings && (
-            <div className="space-y-2 p-2.5 rounded-lg border border-neutral-700 bg-neutral-950/80 text-[11px]">
-              <div>
-                <label className="block font-bold text-neutral-300 mb-1">Token de GitHub (PAT)</label>
-                <input
-                  type="password"
-                  value={githubConfig.token}
-                  onChange={(e) => updateGithubConfig({ token: e.target.value })}
-                  placeholder="ghp_xxxx o github_pat_xxxx"
-                  className="w-full px-2.5 py-1.5 rounded bg-neutral-800 border border-neutral-700 text-white font-mono text-[10px]"
-                />
-              </div>
-              <div>
-                <label className="block font-bold text-neutral-300 mb-1">Repositorio (usuario/repo)</label>
-                <input
-                  type="text"
-                  value={githubConfig.repo}
-                  onChange={(e) => updateGithubConfig({ repo: e.target.value })}
-                  placeholder="ashp98072-dot/LogiserviciosMonaco"
-                  className="w-full px-2.5 py-1.5 rounded bg-neutral-800 border border-neutral-700 text-white font-mono text-[10px]"
-                />
-              </div>
-              <div>
-                <label className="block font-bold text-neutral-300 mb-1">Rama</label>
-                <input
-                  type="text"
-                  value={githubConfig.branch || "main"}
-                  onChange={(e) => updateGithubConfig({ branch: e.target.value })}
-                  className="w-full px-2.5 py-1.5 rounded bg-neutral-800 border border-neutral-700 text-white font-mono text-[10px]"
-                />
-              </div>
-              <label className="flex items-start gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={Boolean(githubConfig.autoSync)}
-                  onChange={(e) => updateGithubConfig({ autoSync: e.target.checked })}
-                  className="mt-0.5"
-                />
-                <span className="text-neutral-300 leading-snug">
-                  <strong className="text-white">Auto-publicar</strong> — sube a GitHub automáticamente al editar (4 s después de cada cambio).
-                </span>
-              </label>
-            </div>
           )}
 
-          <p className="text-[10px] text-emerald-400/90 leading-tight bg-emerald-950/40 p-2 rounded border border-emerald-800/50">
-            🌐 Los cambios se guardan en tu navegador al instante. Para que el sitio público se actualice, publica en GitHub
-            {githubConfig.autoSync ? " (automático activado)" : ""}. Repo: <code>{githubConfig.repo || "sin configurar"}</code>
-          </p>
           {onCloseAdmin && (
             <button
               onClick={onCloseAdmin}
-              className="w-full text-[10px] text-neutral-400 hover:text-white underline"
+              className="w-full text-[10px] text-neutral-400 hover:text-white underline text-left"
             >
               Volver al Panel Clásico
             </button>

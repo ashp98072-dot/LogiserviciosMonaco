@@ -38,24 +38,10 @@ import DynamicSections from "@/components/DynamicSections";
 import VisualSiteEditor from "@/components/VisualSiteEditor";
 import { useSiteData, Vacancy, FleetItem, CustomSection } from "@/context/SiteDataContext";
 import { compressImageFile } from "@/lib/imageUtils";
-
-const ADMIN_SESSION_KEY = "logiservicios_monaco_admin_session_v1";
-const ADMIN_SESSION_TTL_MS = 8 * 60 * 60 * 1000;
-
-function readAdminSession(): boolean {
-  try {
-    const raw = sessionStorage.getItem(ADMIN_SESSION_KEY);
-    if (!raw) return false;
-    const { at } = JSON.parse(raw) as { at?: number };
-    return Boolean(at && Date.now() - at < ADMIN_SESSION_TTL_MS);
-  } catch {
-    return false;
-  }
-}
-
-function writeAdminSession() {
-  sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ at: Date.now() }));
-}
+import {
+  readAdminSession,
+  writeAdminSession,
+} from "@/lib/adminSession";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -85,10 +71,9 @@ function AdminPage() {
     setAdminPin,
     resetToDefaults,
     importData,
-    githubConfig,
-    updateGithubConfig,
     syncToGitHub,
     isSyncing,
+    serverPublishAvailable,
     hasUnpublishedChanges,
   } = useSiteData();
 
@@ -129,7 +114,7 @@ function AdminPage() {
     e.preventDefault();
     if (pinInput === siteData.adminPin) {
       setIsAuthenticated(true);
-      writeAdminSession();
+      writeAdminSession(pinInput);
       setLoginError("");
     } else {
       setLoginError("PIN o Contraseña incorrecta.");
@@ -268,25 +253,27 @@ function AdminPage() {
             <div className="flex flex-wrap items-center gap-2">
               {hasUnpublishedChanges && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold">
-                  Cambios sin publicar en GitHub
+                  Publicando cambios al sitio web...
                 </span>
               )}
-              <button
-                onClick={async () => {
-                  if (!githubConfig.token) {
-                    setActiveTab("ajustes");
-                    showSuccess("Por favor ingresa tu Token de GitHub en Ajustes para activar la publicación directa.");
-                    return;
-                  }
-                  showSuccess("⏳ Conectando con GitHub para publicar cambios...");
-                  const res = await syncToGitHub();
-                  showSuccess(res.message);
-                }}
-                disabled={isSyncing}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition disabled:opacity-50"
-              >
-                <Save className="h-4 w-4" /> {isSyncing ? "Guardando..." : "🚀 Publicar en GitHub"}
-              </button>
+              {serverPublishAvailable && !hasUnpublishedChanges && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-semibold">
+                  Sitio web conectado — cambios automáticos
+                </span>
+              )}
+              {!serverPublishAvailable && (
+                <button
+                  onClick={async () => {
+                    showSuccess("⏳ Publicando en el sitio web...");
+                    const res = await syncToGitHub();
+                    showSuccess(res.message);
+                  }}
+                  disabled={isSyncing}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition disabled:opacity-50"
+                >
+                  <Save className="h-4 w-4" /> {isSyncing ? "Publicando..." : "Publicar en el sitio web"}
+                </button>
+              )}
               <button
                 onClick={() => setEditorMode("visual")}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-gold-gradient text-gold-foreground font-bold text-xs shadow-xs hover:brightness-105 transition"
@@ -2089,89 +2076,38 @@ function AdminPage() {
           {/* TAB 5: AJUSTES & RESPALDO */}
           {activeTab === "ajustes" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* GitHub Direct Sync Box */}
+              {/* Publicación al sitio web */}
               <div className="md:col-span-2 bg-card border-2 border-emerald-500/30 rounded-xl p-6 space-y-4 shadow-sm">
-                <div className="flex items-center justify-between flex-wrap gap-3">
-                  <div>
-                    <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-gold" /> Guardar y Publicar en la Nube (GitHub Direct Sync)
-                    </h2>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Sincroniza tus cambios de fotos, vacantes y flota directamente con tu repositorio de GitHub para que la web pública se actualice al instante.
+                <div>
+                  <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-gold" /> Publicación en el sitio web
+                  </h2>
+                  {serverPublishAvailable ? (
+                    <p className="text-sm text-emerald-700 dark:text-emerald-300 mt-2">
+                      ✅ <strong>Todo listo.</strong> Cuando edites plazas, textos o fotos, los cambios se suben solos a
+                      logiserviciosmonaco.com en unos segundos. No necesitas hacer nada más.
                     </p>
-                  </div>
+                  ) : (
+                    <p className="text-sm text-amber-700 dark:text-amber-300 mt-2">
+                      ⚠️ La publicación automática aún no está activa. Pulsa el botón para publicar manualmente, o contacta
+                      al administrador del sitio.
+                    </p>
+                  )}
+                </div>
+
+                {!serverPublishAvailable && (
                   <button
                     onClick={async () => {
-                      showSuccess("⏳ Guardando cambios directamente en tu repositorio de GitHub...");
+                      showSuccess("⏳ Publicando en el sitio web...");
                       const res = await syncToGitHub();
                       showSuccess(res.message);
                     }}
                     disabled={isSyncing}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition disabled:opacity-50 shrink-0"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition disabled:opacity-50"
                   >
-                    <Save className="h-4 w-4" /> {isSyncing ? "Guardando en GitHub..." : "🚀 Guardar y Publicar en GitHub"}
+                    <Save className="h-4 w-4" /> {isSyncing ? "Publicando..." : "Publicar en el sitio web ahora"}
                   </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs pt-2">
-                  <div>
-                    <label className="block font-semibold mb-1 text-foreground">GitHub Personal Access Token (PAT)</label>
-                    <input
-                      type="password"
-                      value={githubConfig.token}
-                      onChange={(e) => updateGithubConfig({ token: e.target.value })}
-                      placeholder="ghp_xxxx... o github_pat_xxxx..."
-                      className="w-full px-3 py-2 rounded-lg border border-input bg-background font-mono text-xs"
-                    />
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      Token con permiso de escritura (<code>repo</code>). Se guarda de forma segura en tu navegador.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold mb-1 text-foreground">Repositorio de GitHub (usuario/repo)</label>
-                    <input
-                      type="text"
-                      value={githubConfig.repo}
-                      onChange={(e) => updateGithubConfig({ repo: e.target.value })}
-                      placeholder="ashp98072-dot/LogiserviciosMonaco"
-                      className="w-full px-3 py-2 rounded-lg border border-input bg-background font-mono text-xs"
-                    />
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      Ejemplo: <code>ashp98072-dot/LogiserviciosMonaco</code>
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold mb-1 text-foreground">Rama (Branch)</label>
-                    <input
-                      type="text"
-                      value={githubConfig.branch || "main"}
-                      onChange={(e) => updateGithubConfig({ branch: e.target.value })}
-                      placeholder="main"
-                      className="w-full px-3 py-2 rounded-lg border border-input bg-background font-mono text-xs"
-                    />
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      Nombre de la rama (por defecto <code>main</code>).
-                    </p>
-                  </div>
-                </div>
-
-                <label className="flex items-start gap-3 p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(githubConfig.autoSync)}
-                    onChange={(e) => updateGithubConfig({ autoSync: e.target.checked })}
-                    className="mt-0.5"
-                  />
-                  <span className="text-xs">
-                    <strong className="block text-foreground">Publicar automáticamente en GitHub al guardar</strong>
-                    <span className="text-muted-foreground">
-                      Cuando está activo, cada cambio se sube a GitHub unos segundos después de editar (requiere Token configurado).
-                      Vercel reconstruirá el sitio automáticamente.
-                    </span>
-                  </span>
-                </label>
+                )}
               </div>
 
               {/* Security settings */}

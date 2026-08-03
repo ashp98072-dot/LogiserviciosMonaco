@@ -3,6 +3,8 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
+import "dotenv/config";
+import { publishSiteDataToGitHub } from "./lib/publishSiteData.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -58,6 +60,51 @@ async function startServer() {
     } catch (err: any) {
       console.error("Error writing site-data.json:", err);
       return res.status(500).json({ success: false, error: err.message || "Failed to save data" });
+    }
+  });
+
+  app.get("/api/publish-status", (_req, res) => {
+    res.json({
+      serverPublish: Boolean(process.env.GITHUB_TOKEN),
+      autoSync: true,
+    });
+  });
+
+  app.post("/api/publish", async (req, res) => {
+    const githubToken = process.env.GITHUB_TOKEN;
+    if (!githubToken) {
+      return res.status(503).json({
+        success: false,
+        useClient: true,
+        message: "Publicación automática no configurada en el servidor.",
+      });
+    }
+
+    const expectedPin = process.env.CMS_ADMIN_PIN;
+    const bodyPin = typeof req.body?.pin === "string" ? req.body.pin : "";
+    if (expectedPin && bodyPin !== expectedPin) {
+      return res.status(401).json({ success: false, message: "PIN de administrador incorrecto." });
+    }
+
+    const data = req.body?.data;
+    if (!data || typeof data !== "object") {
+      return res.status(400).json({ success: false, message: "Datos del sitio inválidos." });
+    }
+
+    const repo = process.env.GITHUB_REPO || "ashp98072-dot/LogiserviciosMonaco";
+    const branch = process.env.GITHUB_BRANCH || "main";
+    const filePath = process.env.GITHUB_FILE_PATH || "site-data.json";
+
+    try {
+      const result = await publishSiteDataToGitHub(data, {
+        token: githubToken,
+        repo,
+        branch,
+        filePath,
+      });
+      return res.status(result.success ? 200 : 502).json(result);
+    } catch (err: any) {
+      return res.status(500).json({ success: false, message: err.message || "Error al publicar" });
     }
   });
 

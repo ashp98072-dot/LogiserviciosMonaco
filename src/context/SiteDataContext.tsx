@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import { getAdminPinFromSession } from "@/lib/adminSession";
 
 // Default images imports
 import logoImg from "@/assets/logo.png";
@@ -337,6 +338,8 @@ interface SiteDataContextType {
   syncWithServer: (customData?: SiteData) => Promise<boolean>;
   hasUnpublishedChanges: boolean;
   lastGitHubPublishedAt: string | null;
+  serverPublishAvailable: boolean;
+  canPublishGlobally: boolean;
   exportData: () => void;
   updateContactInfo: (info: Partial<ContactInfo>) => void;
   updateVacancy: (id: string, updated: Partial<Vacancy>) => void;
@@ -530,7 +533,7 @@ const DEFAULT_GITHUB_CONFIG: GitHubSyncConfig = {
   repo: "ashp98072-dot/LogiserviciosMonaco",
   branch: "main",
   filePath: "site-data.json",
-  autoSync: false,
+  autoSync: true,
 };
 
 function githubAuthHeader(token: string): string {
@@ -553,6 +556,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   });
   const githubSyncInFlightRef = useRef(false);
+  const [serverPublishAvailable, setServerPublishAvailable] = useState(false);
 
   const [githubConfig, setGithubConfig] = useState<GitHubSyncConfig>(() => {
     try {
@@ -572,29 +576,84 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
+  const applyPublishSuccess = (payload: SiteData, updatedAt: string) => {
+    setSiteData((prev) => ({ ...prev, updatedAt }));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
+    localStorage.setItem(LOCAL_STORAGE_META_KEY, updatedAt);
+    localStorage.setItem(GITHUB_PUBLISHED_AT_KEY, updatedAt);
+    setLastGitHubPublishedAt(updatedAt);
+    setLastSyncedAt(new Date().toLocaleTimeString());
+  };
+
   const syncToGitHub = async (
     customConfig?: Partial<GitHubSyncConfig>,
     dataOverride?: SiteData,
   ): Promise<{ success: boolean; message: string }> => {
-    const cfg = { ...githubConfig, ...customConfig };
-    if (!cfg.token || !cfg.repo) {
-      return {
-        success: false,
-        message: "Por favor ingresa tu Personal Access Token de GitHub y el Repositorio (ej: usuario/repositorio) en la pestaña Ajustes.",
-      };
-    }
     if (githubSyncInFlightRef.current) {
       return { success: false, message: "Ya hay una publicación en curso. Espera un momento." };
     }
     githubSyncInFlightRef.current = true;
     setIsSyncing(true);
+
+    const sourceData = dataOverride || siteData;
+    const payload: SiteData = { ...sourceData, updatedAt: new Date().toISOString() };
+
+    try {
+      const serverRes = await fetch("/api/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: payload,
+          pin: getAdminPinFromSession(),
+        }),
+      });
+
+      const serverJson = (await serverRes.json().catch(() => ({}))) as {
+        success?: boolean;
+        message?: string;
+        updatedAt?: string;
+        useClient?: boolean;
+      };
+
+      if (serverRes.ok && serverJson.success) {
+        applyPublishSuccess(payload, serverJson.updatedAt || payload.updatedAt!);
+        setIsSyncing(false);
+        githubSyncInFlightRef.current = false;
+        return {
+          success: true,
+          message: serverJson.message || "¡Sitio web actualizado para todos!",
+        };
+      }
+
+      if (serverRes.status !== 503 || !serverJson.useClient) {
+        setIsSyncing(false);
+        githubSyncInFlightRef.current = false;
+        return {
+          success: false,
+          message: serverJson.message || "No se pudo publicar. Intenta de nuevo.",
+        };
+      }
+    } catch {
+      // Fall through to client-side publish if server unavailable
+    }
+
+    const cfg = { ...githubConfig, ...customConfig };
+    if (!cfg.token || !cfg.repo) {
+      setIsSyncing(false);
+      githubSyncInFlightRef.current = false;
+      return {
+        success: false,
+        message:
+          "No se pudo publicar en el sitio web. Contacta al administrador para activar la publicación automática.",
+      };
+    }
+
     try {
       const cleanRepo = cfg.repo.replace("https://github.com/", "").replace(".git", "").replace(/^\/+|\/+$/g, "").trim();
       const filePath = cfg.filePath || "site-data.json";
       const branch = cfg.branch || "main";
       const authHeader = githubAuthHeader(cfg.token);
 
-      // 1. Fetch current file SHA if it exists
       let sha: string | undefined = undefined;
       try {
         const getRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${filePath}?ref=${branch}`, {
@@ -611,9 +670,6 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         // file doesn't exist yet or new repo
       }
 
-      // 2. Base64 encode siteData JSON safely for Unicode characters
-      const sourceData = dataOverride || siteData;
-      const payload = { ...sourceData, updatedAt: new Date().toISOString() };
       const jsonString = JSON.stringify(payload, null, 2);
       const utf8Bytes = new TextEncoder().encode(jsonString);
       let binary = "";
@@ -622,7 +678,6 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
       const base64Content = btoa(binary);
 
-      // 3. Put to GitHub REST API
       const putRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${filePath}`, {
         method: "PUT",
         headers: {
@@ -639,33 +694,28 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       });
 
       if (putRes.ok) {
-        setSiteData((prev) => ({ ...prev, updatedAt: payload.updatedAt }));
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
-        localStorage.setItem(LOCAL_STORAGE_META_KEY, payload.updatedAt);
-        localStorage.setItem(GITHUB_PUBLISHED_AT_KEY, payload.updatedAt);
-        setLastGitHubPublishedAt(payload.updatedAt);
-        setLastSyncedAt(new Date().toLocaleTimeString());
+        applyPublishSuccess(payload, payload.updatedAt!);
         setIsSyncing(false);
         githubSyncInFlightRef.current = false;
         return {
           success: true,
-          message: "¡Publicado en GitHub! Vercel actualizará el sitio en 1-2 minutos. Los visitantes verán los cambios de inmediato vía sincronización en la nube.",
-        };
-      } else {
-        const errData = await putRes.json().catch(() => ({ message: "Respuesta no válida" }));
-        setIsSyncing(false);
-        githubSyncInFlightRef.current = false;
-        return {
-          success: false,
-          message: `Error de GitHub (${putRes.status}): ${errData.message || "Verifica tu Token y permisos de escritura ('repo')."}`,
+          message: "¡Sitio web actualizado! Los cambios ya están en línea para todos.",
         };
       }
+
+      const errData = await putRes.json().catch(() => ({ message: "Respuesta no válida" }));
+      setIsSyncing(false);
+      githubSyncInFlightRef.current = false;
+      return {
+        success: false,
+        message: `Error de GitHub (${putRes.status}): ${errData.message || "Verifica permisos de escritura."}`,
+      };
     } catch (err: any) {
       setIsSyncing(false);
       githubSyncInFlightRef.current = false;
       return {
         success: false,
-        message: `Error de red al conectar con GitHub: ${err.message || err}`,
+        message: `Error de red al publicar: ${err.message || err}`,
       };
     }
   };
@@ -804,6 +854,26 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
   }, [githubConfig.repo, githubConfig.branch]);
 
+  useEffect(() => {
+    fetch("/api/publish-status", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && typeof data.serverPublish === "boolean") {
+          setServerPublishAvailable(data.serverPublish);
+        }
+      })
+      .catch(() => setServerPublishAvailable(false));
+  }, []);
+
+  const canPublishGlobally =
+    serverPublishAvailable || Boolean(githubConfig.token && githubConfig.repo);
+
+  const hasUnpublishedChanges = Boolean(
+    canPublishGlobally &&
+      siteData.updatedAt &&
+      siteData.updatedAt !== (lastGitHubPublishedAt || ""),
+  );
+
   // Save to server API function
   const syncWithServer = async (customData?: SiteData): Promise<boolean> => {
     const dataToSave = customData || siteData;
@@ -853,13 +923,13 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }, 1500);
 
     let githubTimer: ReturnType<typeof setTimeout> | undefined;
-    if (githubConfig.autoSync && githubConfig.token && githubConfig.repo) {
+    if (githubConfig.autoSync !== false && canPublishGlobally) {
       githubTimer = setTimeout(async () => {
         const publishedAt = localStorage.getItem(GITHUB_PUBLISHED_AT_KEY) || "";
         if (publishedAt && dataToPersist.updatedAt && publishedAt >= dataToPersist.updatedAt) return;
         const res = await syncToGitHub(undefined, dataToPersist);
         if (!res.success) {
-          console.warn("Auto-sync GitHub:", res.message);
+          console.warn("Auto-publicación:", res.message);
         }
       }, 4000);
     }
@@ -868,13 +938,14 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       clearTimeout(serverTimer);
       if (githubTimer) clearTimeout(githubTimer);
     };
-  }, [siteData, isInitialized, githubConfig.autoSync, githubConfig.token, githubConfig.repo]);
-
-  const hasUnpublishedChanges = Boolean(
-    githubConfig.token &&
-      siteData.updatedAt &&
-      siteData.updatedAt !== (lastGitHubPublishedAt || ""),
-  );
+  }, [
+    siteData,
+    isInitialized,
+    githubConfig.autoSync,
+    githubConfig.token,
+    githubConfig.repo,
+    canPublishGlobally,
+  ]);
 
   const updateContactInfo = (info: Partial<ContactInfo>) => {
     const updatedInfo = { ...info };
@@ -1069,6 +1140,8 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         syncWithServer,
         hasUnpublishedChanges,
         lastGitHubPublishedAt,
+        serverPublishAvailable,
+        canPublishGlobally,
         exportData,
         updateContactInfo,
         updateVacancy,
