@@ -145,7 +145,7 @@ function Page() {
                     <div className="border-t border-border pt-3">
                       <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Requisitos Clave</h4>
                       <ul className="space-y-1.5 text-xs text-muted-foreground">
-                        {vacancy.requirements.map((req, idx) => (
+                        {(vacancy.requirements ?? []).map((req, idx) => (
                           <li key={idx} className="flex items-start gap-2">
                             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
                             <span>{req}</span>
@@ -158,7 +158,7 @@ function Page() {
                     <div className="border-t border-border pt-3">
                       <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Beneficios</h4>
                       <ul className="space-y-1.5 text-xs text-muted-foreground">
-                        {vacancy.offers.map((off, idx) => (
+                        {(vacancy.offers ?? []).map((off, idx) => (
                           <li key={idx} className="flex items-start gap-2">
                             <Calendar className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
                             <span>{off}</span>
@@ -225,9 +225,11 @@ function Page() {
                 className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="">-- Selecciona una plaza --</option>
-                <option value="Piloto de Cabezales">Piloto de Cabezales (Licencia A)</option>
-                <option value="Piloto 5TN">Piloto 5TN (Licencia B)</option>
-                <option value="Piloto 10TN">Piloto 10TN (Licencia A)</option>
+                {vacancies.map((vacancy) => (
+                  <option key={vacancy.id} value={vacancy.title}>
+                    {vacancy.title}
+                  </option>
+                ))}
                 <option value="Otro puesto / Transporte">Otro puesto o transporte</option>
               </select>
             </div>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 
 // Default images imports
 import logoImg from "@/assets/logo.png";
@@ -136,6 +136,7 @@ export interface SiteData {
   branding: Branding;
   customSections: CustomSection[];
   adminPin: string;
+  updatedAt?: string;
 }
 
 const DEFAULT_BRANDING: Branding = {
@@ -170,6 +171,7 @@ const DEFAULT_VACANCIES: Vacancy[] = [
     title: "Piloto de Cabezales",
     location: "Ciudad de Guatemala, Zona 12 (Petapa)",
     license: "Licencia Tipo A vigente",
+    salary: "Q8,000.00 / mes",
     flyerImage: pilotoCabezalesFlyer,
     subjectEmail: "Piloto cabezal",
     whatsappNumber: "50230137849",
@@ -195,6 +197,7 @@ const DEFAULT_VACANCIES: Vacancy[] = [
     title: "Piloto de 5 a 8 Toneladas",
     location: "Ciudad de Guatemala, Zona 12 (Petapa)",
     license: "Licencia Tipo A o B vigente",
+    salary: "Q5,500.00 - Q6,500.00 / mes",
     flyerImage: piloto5TonFlyer,
     subjectEmail: "Piloto 5 a 8 Toneladas",
     whatsappNumber: "50230137849",
@@ -220,6 +223,7 @@ const DEFAULT_VACANCIES: Vacancy[] = [
     title: "Piloto de 10 a 12 Toneladas",
     location: "Ciudad de Guatemala, Zona 12 (Petapa)",
     license: "Licencia Tipo A o B vigente",
+    salary: "Q6,000.00 - Q7,000.00 / mes",
     flyerImage: piloto10TonFlyer,
     subjectEmail: "Piloto 10 a 12 Toneladas",
     whatsappNumber: "50230137849",
@@ -397,12 +401,65 @@ function sanitizeCustomSections(sections: CustomSection[] | undefined): CustomSe
   return sections.filter((s) => s.id !== "sec-1" && !s.title?.includes("Garantía de Calidad") && !s.subtitle?.includes("Ventaja Competitiva"));
 }
 
+function sanitizeVacancies(vacancies: unknown): Vacancy[] {
+  if (!Array.isArray(vacancies) || vacancies.length === 0) return DEFAULT_VACANCIES;
+
+  const defaultById = Object.fromEntries(DEFAULT_VACANCIES.map((v) => [v.id, v]));
+
+  return vacancies.map((raw: Record<string, unknown>) => {
+    const defaults = defaultById[String(raw.id)] || ({} as Partial<Vacancy>);
+    const responsibilities = Array.isArray(raw.responsibilities) ? (raw.responsibilities as string[]) : [];
+    const offers = Array.isArray(raw.offers)
+      ? (raw.offers as string[])
+      : responsibilities.length > 0
+        ? responsibilities
+        : defaults.offers || [];
+    const requirements = Array.isArray(raw.requirements)
+      ? (raw.requirements as string[])
+      : defaults.requirements || [];
+
+    return {
+      id: String(raw.id || `vac-${Date.now()}`),
+      title: String(raw.title || defaults.title || "Plaza disponible"),
+      location: String(raw.location || defaults.location || DEFAULT_CONTACT_INFO.address),
+      license: String(raw.license || defaults.license || ""),
+      salary: String(raw.salary || defaults.salary || ""),
+      flyerImage: String(raw.flyerImage || defaults.flyerImage || ""),
+      subjectEmail: String(raw.subjectEmail || defaults.subjectEmail || raw.title || ""),
+      whatsappNumber: String(raw.whatsappNumber || defaults.whatsappNumber || DEFAULT_CONTACT_INFO.whatsappRRHH),
+      emailContact: String(raw.emailContact || defaults.emailContact || DEFAULT_CONTACT_INFO.emailRRHH),
+      requirements,
+      offers,
+      active: raw.active !== false,
+    };
+  });
+}
+
+function mergeSiteData(raw: Partial<SiteData>): SiteData {
+  const contact = { ...DEFAULT_CONTACT_INFO, ...raw.contactInfo };
+  if (contact.mapEmbedUrl) {
+    contact.mapEmbedUrl = extractMapUrl(contact.mapEmbedUrl);
+  }
+  return {
+    ...DEFAULT_SITE_DATA,
+    ...raw,
+    contactInfo: contact,
+    vacancies: sanitizeVacancies(raw.vacancies),
+    fleet: sanitizeFleetImages(raw.fleet || DEFAULT_FLEET),
+    generalInfo: { ...DEFAULT_GENERAL_INFO, ...raw.generalInfo },
+    branding: { ...DEFAULT_BRANDING, ...raw.branding },
+    customSections: sanitizeCustomSections(raw.customSections || DEFAULT_CUSTOM_SECTIONS),
+    updatedAt: raw.updatedAt,
+  };
+}
+
 const LOCAL_STORAGE_KEY = "logiservicios_monaco_cms_data_v2";
+const LOCAL_STORAGE_META_KEY = "logiservicios_monaco_cms_updated_at_v1";
 const GITHUB_CONFIG_KEY = "logiservicios_monaco_github_config_v1";
 
 const DEFAULT_GITHUB_CONFIG: GitHubSyncConfig = {
   token: "",
-  repo: "laulaisha8/logiserviciosmonaco",
+  repo: "ashp98072-dot/LogiserviciosMonaco",
   branch: "main",
   filePath: "site-data.json",
 };
@@ -411,6 +468,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const skipTimestampBumpRef = useRef(false);
 
   const [githubConfig, setGithubConfig] = useState<GitHubSyncConfig>(() => {
     try {
@@ -462,7 +520,8 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
 
       // 2. Base64 encode siteData JSON safely for Unicode characters
-      const jsonString = JSON.stringify(siteData, null, 2);
+      const payload = { ...siteData, updatedAt: new Date().toISOString() };
+      const jsonString = JSON.stringify(payload, null, 2);
       const utf8Bytes = new TextEncoder().encode(jsonString);
       let binary = "";
       for (let i = 0; i < utf8Bytes.length; i++) {
@@ -487,6 +546,8 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       });
 
       if (putRes.ok) {
+        setSiteData((prev) => ({ ...prev, updatedAt: payload.updatedAt }));
+        localStorage.setItem(LOCAL_STORAGE_META_KEY, payload.updatedAt);
         setLastSyncedAt(new Date().toLocaleTimeString());
         setIsSyncing(false);
         return {
@@ -510,45 +571,20 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  const [siteData, setSiteData] = useState<SiteData>(() => {
-    try {
-      // Clear legacy storage v1 to prevent stale data retention on old devices
-      localStorage.removeItem("logiservicios_monaco_cms_data_v1");
-
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const contact = { ...DEFAULT_CONTACT_INFO, ...parsed.contactInfo };
-        if (contact.mapEmbedUrl) {
-          contact.mapEmbedUrl = extractMapUrl(contact.mapEmbedUrl);
-        }
-        return {
-          ...DEFAULT_SITE_DATA,
-          ...parsed,
-          contactInfo: contact,
-          fleet: sanitizeFleetImages(parsed.fleet || DEFAULT_FLEET),
-          generalInfo: { ...DEFAULT_GENERAL_INFO, ...parsed.generalInfo },
-          branding: { ...DEFAULT_BRANDING, ...parsed.branding },
-          customSections: sanitizeCustomSections(parsed.customSections || DEFAULT_CUSTOM_SECTIONS),
-        };
-      }
-    } catch (e) {
-      console.error("Error loading saved site data from localStorage:", e);
-    }
-    return DEFAULT_SITE_DATA;
-  });
+  const [siteData, setSiteData] = useState<SiteData>(DEFAULT_SITE_DATA);
 
   // Helper to fetch live fresh data from GitHub raw or site static endpoints with cache-busting
   const fetchFreshDataFromCloud = async (): Promise<SiteData | null> => {
     const timestamp = Date.now();
-    const repo = githubConfig.repo || "laulaisha8/logiserviciosmonaco";
+    const repo = githubConfig.repo || "ashp98072-dot/LogiserviciosMonaco";
     const branch = githubConfig.branch || "main";
     const cleanRepo = repo.replace("https://github.com/", "").replace(".git", "").replace(/^\/+|\/+$/g, "").trim();
 
+    // Prefer same-origin site-data.json (Vercel deploy) before GitHub raw CDN
     const endpoints = [
-      `https://raw.githubusercontent.com/${cleanRepo}/${branch}/site-data.json?cache_bust=${timestamp}`,
-      `/site-data.json?cache_bust=${timestamp}`,
-      `/api/site-data?cache_bust=${timestamp}`,
+      `/site-data.json?t=${timestamp}`,
+      `https://raw.githubusercontent.com/${cleanRepo}/${branch}/site-data.json?t=${timestamp}`,
+      `/api/site-data?t=${timestamp}`,
     ];
 
     for (const url of endpoints) {
@@ -557,42 +593,61 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           cache: "no-store",
           headers: {
             "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache",
+            Pragma: "no-cache",
           },
         });
         if (res.ok) {
-          const contentType = res.headers.get("content-type") || "";
-          let dataJson: any = null;
-          if (contentType.includes("application/json") || url.endsWith(".json") || url.includes("raw.githubusercontent.com")) {
-            const text = await res.text();
-            try {
-              dataJson = JSON.parse(text);
-            } catch (e) {
-              continue;
-            }
+          const text = await res.text();
+          let dataJson: unknown = null;
+          try {
+            dataJson = JSON.parse(text);
+          } catch {
+            continue;
           }
-          if (dataJson) {
-            const rawData = dataJson.data || dataJson;
+          if (dataJson && typeof dataJson === "object") {
+            const rawData = (dataJson as { data?: SiteData }).data || (dataJson as SiteData);
             if (rawData && typeof rawData === "object" && (rawData.contactInfo || rawData.vacancies || rawData.fleet)) {
-              const contact = { ...DEFAULT_CONTACT_INFO, ...rawData.contactInfo };
-              if (contact.mapEmbedUrl) {
-                contact.mapEmbedUrl = extractMapUrl(contact.mapEmbedUrl);
-              }
-              return {
-                ...DEFAULT_SITE_DATA,
-                ...rawData,
-                contactInfo: contact,
-                fleet: sanitizeFleetImages(rawData.fleet || DEFAULT_FLEET),
-                generalInfo: { ...DEFAULT_GENERAL_INFO, ...rawData.generalInfo },
-                branding: { ...DEFAULT_BRANDING, ...rawData.branding },
-                customSections: sanitizeCustomSections(rawData.customSections || DEFAULT_CUSTOM_SECTIONS),
-              };
+              return mergeSiteData(rawData);
             }
           }
         }
-      } catch (e) {
+      } catch {
         // Try next endpoint
       }
+    }
+    return null;
+  };
+
+  const applyCloudData = (liveData: SiteData) => {
+    setSiteData((prev) => {
+      const cachedAt = localStorage.getItem(LOCAL_STORAGE_META_KEY) || "";
+      const liveAt = liveData.updatedAt || "";
+      const shouldApply =
+        !cachedAt ||
+        !liveAt ||
+        liveAt >= cachedAt ||
+        JSON.stringify(prev) === JSON.stringify(DEFAULT_SITE_DATA);
+
+      if (!shouldApply) return prev;
+
+      skipTimestampBumpRef.current = true;
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(liveData));
+      if (liveAt) {
+        localStorage.setItem(LOCAL_STORAGE_META_KEY, liveAt);
+      }
+      setLastSyncedAt(new Date().toLocaleTimeString());
+      return liveData;
+    });
+  };
+
+  const loadCachedData = (): SiteData | null => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        return mergeSiteData(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error("Error loading saved site data from localStorage:", e);
     }
     return null;
   };
@@ -601,30 +656,29 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     let isMounted = true;
 
+    // Clear legacy storage v1 to prevent stale data retention on old devices
+    localStorage.removeItem("logiservicios_monaco_cms_data_v1");
+
     async function loadLiveData() {
       const liveData = await fetchFreshDataFromCloud();
-      if (liveData && isMounted) {
-        setSiteData((prev) => {
-          // If live data differs from current state, update state and overwrite local storage
-          const prevStr = JSON.stringify(prev);
-          const liveStr = JSON.stringify(liveData);
-          if (prevStr !== liveStr) {
-            localStorage.setItem(LOCAL_STORAGE_KEY, liveStr);
-            setLastSyncedAt(new Date().toLocaleTimeString());
-            return liveData;
-          }
-          return prev;
-        });
+      if (!isMounted) return;
+
+      if (liveData) {
+        applyCloudData(liveData);
+      } else {
+        const cached = loadCachedData();
+        if (cached) {
+          setSiteData((prev) => (JSON.stringify(prev) === JSON.stringify(DEFAULT_SITE_DATA) ? cached : prev));
+        }
       }
-      if (isMounted) {
-        setIsInitialized(true);
-      }
+
+      setIsInitialized(true);
     }
 
     loadLiveData();
 
-    // Poll every 5 seconds for real-time live synchronization across devices
-    const intervalId = setInterval(loadLiveData, 5000);
+    // Poll every 15 seconds for live synchronization across devices
+    const intervalId = setInterval(loadLiveData, 15000);
 
     // Also re-fetch immediately when user returns to window/tab
     const handleFocus = () => {
@@ -669,14 +723,22 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     if (!isInitialized) return;
 
+    const dataToPersist = skipTimestampBumpRef.current
+      ? siteData
+      : { ...siteData, updatedAt: new Date().toISOString() };
+    skipTimestampBumpRef.current = false;
+
     try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(siteData));
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToPersist));
+      if (dataToPersist.updatedAt) {
+        localStorage.setItem(LOCAL_STORAGE_META_KEY, dataToPersist.updatedAt);
+      }
     } catch (e) {
       console.error("Error saving site data to localStorage:", e);
     }
 
     const timer = setTimeout(() => {
-      syncWithServer(siteData);
+      syncWithServer(dataToPersist);
     }, 1500);
 
     return () => clearTimeout(timer);
@@ -844,6 +906,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const resetToDefaults = () => {
     setSiteData(DEFAULT_SITE_DATA);
     localStorage.removeItem(LOCAL_STORAGE_KEY);
+    localStorage.removeItem(LOCAL_STORAGE_META_KEY);
   };
 
   const exportData = () => {
@@ -857,8 +920,9 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const importData = (data: SiteData) => {
-    setSiteData(data);
-    syncWithServer(data);
+    const merged = mergeSiteData(data);
+    setSiteData(merged);
+    syncWithServer(merged);
   };
 
   return (

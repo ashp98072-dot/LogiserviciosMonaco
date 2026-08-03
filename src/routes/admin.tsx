@@ -2109,11 +2109,11 @@ function AdminPage() {
                       type="text"
                       value={githubConfig.repo}
                       onChange={(e) => updateGithubConfig({ repo: e.target.value })}
-                      placeholder="laulaisha8/logiserviciosmonaco"
+                      placeholder="ashp98072-dot/LogiserviciosMonaco"
                       className="w-full px-3 py-2 rounded-lg border border-input bg-background font-mono text-xs"
                     />
                     <p className="text-[10px] text-muted-foreground mt-1">
-                      Ejemplo: <code>laulaisha8/logiserviciosmonaco</code>
+                      Ejemplo: <code>ashp98072-dot/LogiserviciosMonaco</code>
                     </p>
                   </div>
 

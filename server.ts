@@ -11,7 +11,7 @@ const DATA_FILE = path.join(__dirname, "site-data.json");
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   // Support large JSON payloads for base64 images
   app.use(express.json({ limit: "50mb" }));
@@ -64,6 +64,7 @@ async function startServer() {
   // Vite middleware for development or static serving for production
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
+      configFile: path.join(__dirname, "vite.config.ts"),
       server: { middlewareMode: true },
       appType: "spa",
     });
