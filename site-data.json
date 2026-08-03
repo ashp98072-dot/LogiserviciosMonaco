@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-03T13:30:00.000Z",
+  "updatedAt": "2026-08-03T14:00:00.000Z",
   "contactInfo": {
     "phone": "+502 4017-5893",
     "whatsappMain": "50240175893",
@@ -23,7 +23,7 @@
       "location": "Ciudad de Guatemala, Zona 12 (Petapa)",
       "license": "Licencia Tipo A vigente",
       "salary": "Q8,000.00 / mes",
-      "flyerImage": "",
+      "flyerImage": "/vacancies/piloto-cabezales.png",
       "subjectEmail": "Piloto cabezal",
       "whatsappNumber": "50230137849",
       "emailContact": "recursoshumanos@logiserviciosmonaco.com",
@@ -47,7 +47,7 @@
       "location": "Ciudad de Guatemala, Zona 12 (Petapa)",
       "license": "Licencia Tipo A o B vigente",
       "salary": "Q5,500.00 - Q6,500.00 / mes",
-      "flyerImage": "",
+      "flyerImage": "/vacancies/piloto-10-ton.png",
       "subjectEmail": "Piloto camiones pesados",
       "whatsappNumber": "50230137849",
       "emailContact": "recursoshumanos@logiserviciosmonaco.com",
@@ -71,7 +71,7 @@
       "location": "Ciudad de Guatemala, Zona 12 (Petapa)",
       "license": "Licencia Tipo B o C vigente",
       "salary": "Q4,000.00 - Q4,800.00 / mes",
-      "flyerImage": "",
+      "flyerImage": "/vacancies/piloto-5-ton.png",
       "subjectEmail": "Piloto paneles y camiones ligeros",
       "whatsappNumber": "50230137849",
       "emailContact": "recursoshumanos@logiserviciosmonaco.com",

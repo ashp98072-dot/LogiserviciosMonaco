@@ -49,6 +49,9 @@ function copyPublicAssetsPlugin(): Plugin {
     copyIfExists(path.join(assetsDir, 'Unidades de 2.7 Ton.png'), path.join(publicDir, 'fleet/unidades-2.7ton.png'));
     copyIfExists(path.join(assetsDir, 'Panel 1.5 Ton.png'), path.join(publicDir, 'fleet/panel-1.5ton.png'));
     copyIfExists(path.join(assetsDir, 'Panele 1 Ton .png'), path.join(publicDir, 'fleet/panele-1ton.png'));
+    copyIfExists(path.join(assetsDir, 'piloto cabezales.jpeg'), path.join(publicDir, 'vacancies/piloto-cabezales.jpeg'));
+    copyIfExists(path.join(assetsDir, 'piloto 5 ton.jpeg'), path.join(publicDir, 'vacancies/piloto-5-ton.jpeg'));
+    copyIfExists(path.join(assetsDir, 'piloto 10 ton.jpeg'), path.join(publicDir, 'vacancies/piloto-10-ton.jpeg'));
   };
 
   return {

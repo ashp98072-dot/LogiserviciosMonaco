@@ -6,10 +6,6 @@ import heroImg from "@/assets/logo_1.png";
 import warehouseImg from "@/assets/warehouse.jpg";
 import mapImg from "@/assets/guatemala-map.jpg";
 
-import pilotoCabezalesFlyer from "@/assets/piloto cabezales.jpeg";
-import piloto5TonFlyer from "@/assets/piloto 5 ton.jpeg";
-import piloto10TonFlyer from "@/assets/piloto 10 ton.jpeg";
-
 import cabezalImg from "@/assets/cabezales.png";
 import fuso5Img from "@/assets/Unidades de 5 Ton.png";
 import fuso12Img from "@/assets/Unidades de 12 Ton.png";
@@ -126,6 +122,7 @@ export interface GitHubSyncConfig {
   repo: string;
   branch: string;
   filePath: string;
+  autoSync?: boolean;
 }
 
 export interface SiteData {
@@ -172,7 +169,7 @@ const DEFAULT_VACANCIES: Vacancy[] = [
     location: "Ciudad de Guatemala, Zona 12 (Petapa)",
     license: "Licencia Tipo A vigente",
     salary: "Q8,000.00 / mes",
-    flyerImage: pilotoCabezalesFlyer,
+    flyerImage: "/vacancies/piloto-cabezales.png",
     subjectEmail: "Piloto cabezal",
     whatsappNumber: "50230137849",
     emailContact: "recursoshumanos@logiserviciosmonaco.com",
@@ -198,7 +195,7 @@ const DEFAULT_VACANCIES: Vacancy[] = [
     location: "Ciudad de Guatemala, Zona 12 (Petapa)",
     license: "Licencia Tipo A o B vigente",
     salary: "Q5,500.00 - Q6,500.00 / mes",
-    flyerImage: piloto5TonFlyer,
+    flyerImage: "/vacancies/piloto-5-ton.png",
     subjectEmail: "Piloto 5 a 8 Toneladas",
     whatsappNumber: "50230137849",
     emailContact: "recursoshumanos@logiserviciosmonaco.com",
@@ -224,7 +221,7 @@ const DEFAULT_VACANCIES: Vacancy[] = [
     location: "Ciudad de Guatemala, Zona 12 (Petapa)",
     license: "Licencia Tipo A o B vigente",
     salary: "Q6,000.00 - Q7,000.00 / mes",
-    flyerImage: piloto10TonFlyer,
+    flyerImage: "/vacancies/piloto-10-ton.png",
     subjectEmail: "Piloto 10 a 12 Toneladas",
     whatsappNumber: "50230137849",
     emailContact: "recursoshumanos@logiserviciosmonaco.com",
@@ -333,8 +330,13 @@ interface SiteDataContextType {
   lastSyncedAt: string | null;
   githubConfig: GitHubSyncConfig;
   updateGithubConfig: (cfg: Partial<GitHubSyncConfig>) => void;
-  syncToGitHub: (customConfig?: Partial<GitHubSyncConfig>) => Promise<{ success: boolean; message: string }>;
+  syncToGitHub: (
+    customConfig?: Partial<GitHubSyncConfig>,
+    dataOverride?: SiteData,
+  ) => Promise<{ success: boolean; message: string }>;
   syncWithServer: (customData?: SiteData) => Promise<boolean>;
+  hasUnpublishedChanges: boolean;
+  lastGitHubPublishedAt: string | null;
   exportData: () => void;
   updateContactInfo: (info: Partial<ContactInfo>) => void;
   updateVacancy: (id: string, updated: Partial<Vacancy>) => void;
@@ -371,20 +373,33 @@ export function extractMapUrl(input: string | undefined): string {
   return trimmed;
 }
 
-const ALLOWED_FLEET_IDS = ["cabezales", "12ton", "5ton", "2.7ton", "1.5ton-panel", "1ton-panele"];
+const DEFAULT_FLEET_IMAGE_BY_ID: Record<string, string> = {
+  cabezales: "/fleet/cabezales.png",
+  "12ton": "/fleet/unidades-12ton.png",
+  "5ton": "/fleet/unidades-5ton.png",
+  "2.7ton": "/fleet/unidades-2.7ton.png",
+  "1.5ton-panel": "/fleet/panel-1.5ton.png",
+  "1ton-panele": "/fleet/panele-1ton.png",
+};
 
 function sanitizeFleetImages(fleetList: FleetItem[]): FleetItem[] {
   if (!Array.isArray(fleetList) || fleetList.length === 0) return DEFAULT_FLEET;
-  
-  // Filter out extra items not in allowed 6 IDs
-  const filtered = fleetList.filter((item) => ALLOWED_FLEET_IDS.includes(item.id));
-  if (filtered.length === 0) return DEFAULT_FLEET;
 
-  return filtered.map((item) => {
+  return fleetList.map((item) => {
     let img = item.image || "";
-    if (!img || img.includes("/src/assets/") || img.includes("freightliner") || img.includes("fuso_truck") || img.includes("isuzu_truck") || img.includes("liteace_panel")) {
-      const id = (item.id || "").toLowerCase();
-      if (id.includes("cabezal")) img = "/fleet/cabezales.png";
+    const id = (item.id || "").toLowerCase();
+    const isBroken =
+      !img ||
+      img.includes("/src/assets/") ||
+      img.includes("freightliner") ||
+      img.includes("fuso_truck") ||
+      img.includes("isuzu_truck") ||
+      img.includes("liteace_panel");
+
+    if (isBroken) {
+      if (DEFAULT_FLEET_IMAGE_BY_ID[id]) {
+        img = DEFAULT_FLEET_IMAGE_BY_ID[id];
+      } else if (id.includes("cabezal")) img = "/fleet/cabezales.png";
       else if (id.includes("12")) img = "/fleet/unidades-12ton.png";
       else if (id.includes("5")) img = "/fleet/unidades-5ton.png";
       else if (id.includes("2.7")) img = "/fleet/unidades-2.7ton.png";
@@ -401,13 +416,46 @@ function sanitizeCustomSections(sections: CustomSection[] | undefined): CustomSe
   return sections.filter((s) => s.id !== "sec-1" && !s.title?.includes("Garantía de Calidad") && !s.subtitle?.includes("Ventaja Competitiva"));
 }
 
+const VACANCY_ID_ALIASES: Record<string, string> = {
+  pesados: "10tn",
+  urbanos: "5tn",
+};
+
+const VACANCY_FLYER_PATHS: Record<string, string> = {
+  cabezales: "/vacancies/piloto-cabezales.png",
+  "5tn": "/vacancies/piloto-5-ton.png",
+  "10tn": "/vacancies/piloto-10-ton.png",
+  pesados: "/vacancies/piloto-10-ton.png",
+  urbanos: "/vacancies/piloto-5-ton.png",
+};
+
+function isBrokenAssetPath(url: string | undefined): boolean {
+  if (!url || !url.trim()) return true;
+  return url.includes("/src/assets/") || url.includes("src/assets/");
+}
+
+function resolveVacancyFlyerImage(
+  rawFlyer: unknown,
+  vacancyId: string,
+  defaultFlyer?: string,
+): string {
+  const raw = typeof rawFlyer === "string" ? rawFlyer.trim() : "";
+  if (!isBrokenAssetPath(raw)) return raw;
+  if (!isBrokenAssetPath(defaultFlyer)) return defaultFlyer!.trim();
+
+  const aliasedId = VACANCY_ID_ALIASES[vacancyId] || vacancyId;
+  return VACANCY_FLYER_PATHS[vacancyId] || VACANCY_FLYER_PATHS[aliasedId] || "";
+}
+
 function sanitizeVacancies(vacancies: unknown): Vacancy[] {
   if (!Array.isArray(vacancies) || vacancies.length === 0) return DEFAULT_VACANCIES;
 
   const defaultById = Object.fromEntries(DEFAULT_VACANCIES.map((v) => [v.id, v]));
 
   return vacancies.map((raw: Record<string, unknown>) => {
-    const defaults = defaultById[String(raw.id)] || ({} as Partial<Vacancy>);
+    const vacancyId = String(raw.id || "");
+    const aliasedDefaults = defaultById[vacancyId] || defaultById[VACANCY_ID_ALIASES[vacancyId] || ""] || ({} as Partial<Vacancy>);
+    const defaults = aliasedDefaults;
     const responsibilities = Array.isArray(raw.responsibilities) ? (raw.responsibilities as string[]) : [];
     const offers = Array.isArray(raw.offers)
       ? (raw.offers as string[])
@@ -424,7 +472,7 @@ function sanitizeVacancies(vacancies: unknown): Vacancy[] {
       location: String(raw.location || defaults.location || DEFAULT_CONTACT_INFO.address),
       license: String(raw.license || defaults.license || ""),
       salary: String(raw.salary || defaults.salary || ""),
-      flyerImage: String(raw.flyerImage || defaults.flyerImage || ""),
+      flyerImage: resolveVacancyFlyerImage(raw.flyerImage, vacancyId, defaults.flyerImage),
       subjectEmail: String(raw.subjectEmail || defaults.subjectEmail || raw.title || ""),
       whatsappNumber: String(raw.whatsappNumber || defaults.whatsappNumber || DEFAULT_CONTACT_INFO.whatsappRRHH),
       emailContact: String(raw.emailContact || defaults.emailContact || DEFAULT_CONTACT_INFO.emailRRHH),
@@ -475,19 +523,36 @@ function mergeSiteData(raw: Partial<SiteData>): SiteData {
 const LOCAL_STORAGE_KEY = "logiservicios_monaco_cms_data_v2";
 const LOCAL_STORAGE_META_KEY = "logiservicios_monaco_cms_updated_at_v1";
 const GITHUB_CONFIG_KEY = "logiservicios_monaco_github_config_v1";
+const GITHUB_PUBLISHED_AT_KEY = "logiservicios_monaco_github_published_at_v1";
 
 const DEFAULT_GITHUB_CONFIG: GitHubSyncConfig = {
   token: "",
   repo: "ashp98072-dot/LogiserviciosMonaco",
   branch: "main",
   filePath: "site-data.json",
+  autoSync: false,
 };
+
+function githubAuthHeader(token: string): string {
+  return token.startsWith("ghp_") || token.startsWith("github_pat_")
+    ? `Bearer ${token}`
+    : `token ${token}`;
+}
 
 export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const skipTimestampBumpRef = useRef(false);
+
+  const [lastGitHubPublishedAt, setLastGitHubPublishedAt] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(GITHUB_PUBLISHED_AT_KEY);
+    } catch {
+      return null;
+    }
+  });
+  const githubSyncInFlightRef = useRef(false);
 
   const [githubConfig, setGithubConfig] = useState<GitHubSyncConfig>(() => {
     try {
@@ -507,7 +572,10 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
-  const syncToGitHub = async (customConfig?: Partial<GitHubSyncConfig>): Promise<{ success: boolean; message: string }> => {
+  const syncToGitHub = async (
+    customConfig?: Partial<GitHubSyncConfig>,
+    dataOverride?: SiteData,
+  ): Promise<{ success: boolean; message: string }> => {
     const cfg = { ...githubConfig, ...customConfig };
     if (!cfg.token || !cfg.repo) {
       return {
@@ -515,18 +583,23 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         message: "Por favor ingresa tu Personal Access Token de GitHub y el Repositorio (ej: usuario/repositorio) en la pestaña Ajustes.",
       };
     }
+    if (githubSyncInFlightRef.current) {
+      return { success: false, message: "Ya hay una publicación en curso. Espera un momento." };
+    }
+    githubSyncInFlightRef.current = true;
     setIsSyncing(true);
     try {
       const cleanRepo = cfg.repo.replace("https://github.com/", "").replace(".git", "").replace(/^\/+|\/+$/g, "").trim();
       const filePath = cfg.filePath || "site-data.json";
       const branch = cfg.branch || "main";
+      const authHeader = githubAuthHeader(cfg.token);
 
       // 1. Fetch current file SHA if it exists
       let sha: string | undefined = undefined;
       try {
         const getRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${filePath}?ref=${branch}`, {
           headers: {
-            Authorization: `token ${cfg.token}`,
+            Authorization: authHeader,
             Accept: "application/vnd.github.v3+json",
           },
         });
@@ -534,12 +607,13 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           const fileData = await getRes.json();
           sha = fileData.sha;
         }
-      } catch (e) {
+      } catch {
         // file doesn't exist yet or new repo
       }
 
       // 2. Base64 encode siteData JSON safely for Unicode characters
-      const payload = { ...siteData, updatedAt: new Date().toISOString() };
+      const sourceData = dataOverride || siteData;
+      const payload = { ...sourceData, updatedAt: new Date().toISOString() };
       const jsonString = JSON.stringify(payload, null, 2);
       const utf8Bytes = new TextEncoder().encode(jsonString);
       let binary = "";
@@ -552,12 +626,12 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const putRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${filePath}`, {
         method: "PUT",
         headers: {
-          Authorization: `token ${cfg.token}`,
+          Authorization: authHeader,
           Accept: "application/vnd.github.v3+json",
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: `Actualización de contenido desde Panel Administrador CMS (${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()})`,
+          message: `Actualización CMS Logiservicios Monaco (${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()})`,
           content: base64Content,
           sha: sha,
           branch: branch,
@@ -566,16 +640,21 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       if (putRes.ok) {
         setSiteData((prev) => ({ ...prev, updatedAt: payload.updatedAt }));
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
         localStorage.setItem(LOCAL_STORAGE_META_KEY, payload.updatedAt);
+        localStorage.setItem(GITHUB_PUBLISHED_AT_KEY, payload.updatedAt);
+        setLastGitHubPublishedAt(payload.updatedAt);
         setLastSyncedAt(new Date().toLocaleTimeString());
         setIsSyncing(false);
+        githubSyncInFlightRef.current = false;
         return {
           success: true,
-          message: "¡Excelente! Los datos se han guardado y publicado directamente en tu repositorio de GitHub. El sitio web se actualizará automáticamente.",
+          message: "¡Publicado en GitHub! Vercel actualizará el sitio en 1-2 minutos. Los visitantes verán los cambios de inmediato vía sincronización en la nube.",
         };
       } else {
         const errData = await putRes.json().catch(() => ({ message: "Respuesta no válida" }));
         setIsSyncing(false);
+        githubSyncInFlightRef.current = false;
         return {
           success: false,
           message: `Error de GitHub (${putRes.status}): ${errData.message || "Verifica tu Token y permisos de escritura ('repo')."}`,
@@ -583,6 +662,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
     } catch (err: any) {
       setIsSyncing(false);
+      githubSyncInFlightRef.current = false;
       return {
         success: false,
         message: `Error de red al conectar con GitHub: ${err.message || err}`,
@@ -599,12 +679,13 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const branch = githubConfig.branch || "main";
     const cleanRepo = repo.replace("https://github.com/", "").replace(".git", "").replace(/^\/+|\/+$/g, "").trim();
 
-    // Prefer same-origin site-data.json (Vercel deploy) before GitHub raw CDN
     const endpoints = [
       `/site-data.json?t=${timestamp}`,
       `https://raw.githubusercontent.com/${cleanRepo}/${branch}/site-data.json?t=${timestamp}`,
       `/api/site-data?t=${timestamp}`,
     ];
+
+    const candidates: SiteData[] = [];
 
     for (const url of endpoints) {
       try {
@@ -626,7 +707,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           if (dataJson && typeof dataJson === "object") {
             const rawData = (dataJson as { data?: SiteData }).data || (dataJson as SiteData);
             if (rawData && typeof rawData === "object" && (rawData.contactInfo || rawData.vacancies || rawData.fleet)) {
-              return mergeSiteData(rawData);
+              candidates.push(mergeSiteData(rawData));
             }
           }
         }
@@ -634,7 +715,14 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         // Try next endpoint
       }
     }
-    return null;
+
+    if (candidates.length === 0) return null;
+
+    return candidates.reduce((best, current) => {
+      const bestAt = best.updatedAt || "";
+      const currentAt = current.updatedAt || "";
+      return currentAt >= bestAt ? current : best;
+    });
   };
 
   const applyCloudData = (liveData: SiteData) => {
@@ -684,6 +772,10 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       if (liveData) {
         applyCloudData(liveData);
+        if (liveData.updatedAt && !localStorage.getItem(GITHUB_PUBLISHED_AT_KEY)) {
+          localStorage.setItem(GITHUB_PUBLISHED_AT_KEY, liveData.updatedAt);
+          setLastGitHubPublishedAt(liveData.updatedAt);
+        }
       } else {
         const cached = loadCachedData();
         if (cached) {
@@ -756,12 +848,33 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       console.error("Error saving site data to localStorage:", e);
     }
 
-    const timer = setTimeout(() => {
+    const serverTimer = setTimeout(() => {
       syncWithServer(dataToPersist);
     }, 1500);
 
-    return () => clearTimeout(timer);
-  }, [siteData, isInitialized]);
+    let githubTimer: ReturnType<typeof setTimeout> | undefined;
+    if (githubConfig.autoSync && githubConfig.token && githubConfig.repo) {
+      githubTimer = setTimeout(async () => {
+        const publishedAt = localStorage.getItem(GITHUB_PUBLISHED_AT_KEY) || "";
+        if (publishedAt && dataToPersist.updatedAt && publishedAt >= dataToPersist.updatedAt) return;
+        const res = await syncToGitHub(undefined, dataToPersist);
+        if (!res.success) {
+          console.warn("Auto-sync GitHub:", res.message);
+        }
+      }, 4000);
+    }
+
+    return () => {
+      clearTimeout(serverTimer);
+      if (githubTimer) clearTimeout(githubTimer);
+    };
+  }, [siteData, isInitialized, githubConfig.autoSync, githubConfig.token, githubConfig.repo]);
+
+  const hasUnpublishedChanges = Boolean(
+    githubConfig.token &&
+      siteData.updatedAt &&
+      siteData.updatedAt !== (lastGitHubPublishedAt || ""),
+  );
 
   const updateContactInfo = (info: Partial<ContactInfo>) => {
     const updatedInfo = { ...info };
@@ -954,6 +1067,8 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         updateGithubConfig,
         syncToGitHub,
         syncWithServer,
+        hasUnpublishedChanges,
+        lastGitHubPublishedAt,
         exportData,
         updateContactInfo,
         updateVacancy,

@@ -45,6 +45,7 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
     siteData,
     isSyncing,
     lastSyncedAt,
+    hasUnpublishedChanges,
     syncWithServer,
     exportData,
     updateContactInfo,
@@ -68,6 +69,7 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [fleetTab, setFleetTab] = useState<"catalog" | "specs">("catalog");
+  const [showGithubSettings, setShowGithubSettings] = useState(!githubConfig.token);
 
   // States for Editing Modals/Forms inside Customizer
   const [editingVacancy, setEditingVacancy] = useState<Vacancy | null>(null);
@@ -183,8 +185,24 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
         <div className="p-3 bg-neutral-900 border-b border-neutral-800 space-y-2">
           <div className="flex items-center justify-between text-[11px]">
             <span className="font-bold text-white flex items-center gap-1.5">
-              <span className={`h-2.5 w-2.5 rounded-full ${isSyncing ? "bg-amber-400 animate-ping" : "bg-emerald-400"}`}></span>
-              {isSyncing ? "Guardando en GitHub..." : "Servidor y GitHub Listos"}
+              <span
+                className={`h-2.5 w-2.5 rounded-full ${
+                  isSyncing
+                    ? "bg-amber-400 animate-ping"
+                    : hasUnpublishedChanges
+                      ? "bg-amber-400"
+                      : githubConfig.token
+                        ? "bg-emerald-400"
+                        : "bg-neutral-500"
+                }`}
+              />
+              {isSyncing
+                ? "Publicando en GitHub..."
+                : hasUnpublishedChanges
+                  ? "Cambios sin publicar"
+                  : githubConfig.token
+                    ? "GitHub conectado"
+                    : "Configura GitHub para publicar"}
             </span>
             {lastSyncedAt && (
               <span className="text-[10px] text-neutral-400">
@@ -197,7 +215,8 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
             <button
               onClick={async () => {
                 if (!githubConfig.token) {
-                  showNotification("⚠️ Ingresa tu Token de GitHub en Ajustes del Panel para activar Publicación directa");
+                  setShowGithubSettings(true);
+                  showNotification("⚠️ Configura tu Token de GitHub abajo para publicar");
                   return;
                 }
                 showNotification("⏳ Publicando cambios en tu repositorio de GitHub...");
@@ -213,9 +232,9 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={async () => {
-                  showNotification("⏳ Guardando en memoria local/servidor...");
+                  showNotification("⏳ Guardando en memoria local...");
                   const ok = await syncWithServer();
-                  showNotification(ok ? "✨ ¡Guardado Local y Servidor!" : "✨ Guardado en Navegador");
+                  showNotification(ok ? "✨ Guardado en servidor local" : "✨ Guardado en este navegador");
                 }}
                 className="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-semibold text-[11px] flex items-center justify-center gap-1 transition cursor-pointer"
               >
@@ -224,19 +243,72 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
               </button>
 
               <button
-                onClick={exportData}
+                onClick={() => setShowGithubSettings((v) => !v)}
                 className="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-semibold text-[11px] flex items-center justify-center gap-1 transition cursor-pointer"
-                title="Descargar copia de seguridad en archivo JSON"
               >
-                <Download className="h-3 w-3 text-neutral-400" />
-                <span>Backup JSON</span>
+                <Sparkles className="h-3 w-3 text-gold" />
+                <span>{showGithubSettings ? "Ocultar GitHub" : "Config GitHub"}</span>
               </button>
             </div>
           </div>
 
+          {showGithubSettings && (
+            <div className="space-y-2 p-2.5 rounded-lg border border-neutral-700 bg-neutral-950/80 text-[11px]">
+              <div>
+                <label className="block font-bold text-neutral-300 mb-1">Token de GitHub (PAT)</label>
+                <input
+                  type="password"
+                  value={githubConfig.token}
+                  onChange={(e) => updateGithubConfig({ token: e.target.value })}
+                  placeholder="ghp_xxxx o github_pat_xxxx"
+                  className="w-full px-2.5 py-1.5 rounded bg-neutral-800 border border-neutral-700 text-white font-mono text-[10px]"
+                />
+              </div>
+              <div>
+                <label className="block font-bold text-neutral-300 mb-1">Repositorio (usuario/repo)</label>
+                <input
+                  type="text"
+                  value={githubConfig.repo}
+                  onChange={(e) => updateGithubConfig({ repo: e.target.value })}
+                  placeholder="ashp98072-dot/LogiserviciosMonaco"
+                  className="w-full px-2.5 py-1.5 rounded bg-neutral-800 border border-neutral-700 text-white font-mono text-[10px]"
+                />
+              </div>
+              <div>
+                <label className="block font-bold text-neutral-300 mb-1">Rama</label>
+                <input
+                  type="text"
+                  value={githubConfig.branch || "main"}
+                  onChange={(e) => updateGithubConfig({ branch: e.target.value })}
+                  className="w-full px-2.5 py-1.5 rounded bg-neutral-800 border border-neutral-700 text-white font-mono text-[10px]"
+                />
+              </div>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={Boolean(githubConfig.autoSync)}
+                  onChange={(e) => updateGithubConfig({ autoSync: e.target.checked })}
+                  className="mt-0.5"
+                />
+                <span className="text-neutral-300 leading-snug">
+                  <strong className="text-white">Auto-publicar</strong> — sube a GitHub automáticamente al editar (4 s después de cada cambio).
+                </span>
+              </label>
+            </div>
+          )}
+
           <p className="text-[10px] text-emerald-400/90 leading-tight bg-emerald-950/40 p-2 rounded border border-emerald-800/50">
-            🌐 <strong>Publicación en la Nube:</strong> Haz clic en <strong>🚀 Publicar Cambios en GitHub</strong> para subir directamente los datos y fotos a tu repositorio de GitHub (<code>{githubConfig.repo || "tu_usuario/tu_repo"}</code>) y actualizar el sitio web en vivo.
+            🌐 Los cambios se guardan en tu navegador al instante. Para que el sitio público se actualice, publica en GitHub
+            {githubConfig.autoSync ? " (automático activado)" : ""}. Repo: <code>{githubConfig.repo || "sin configurar"}</code>
           </p>
+          {onCloseAdmin && (
+            <button
+              onClick={onCloseAdmin}
+              className="w-full text-[10px] text-neutral-400 hover:text-white underline"
+            >
+              Volver al Panel Clásico
+            </button>
+          )}
         </div>
 
         {/* Accordions Container */}
@@ -2036,7 +2108,19 @@ export default function VisualSiteEditor({ onCloseAdmin }: VisualSiteEditorProps
                   rows={3}
                   value={editingVacancy.requirements.join("\n")}
                   onChange={(e) =>
-                    setEditingVacancy({ ...editingVacancy, requirements: e.target.value.split("\n") })
+                    setEditingVacancy({ ...editingVacancy, requirements: e.target.value.split("\n").filter(Boolean) })
+                  }
+                  className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block font-semibold mb-1 text-white">Beneficios / Ofrecemos (separados por línea)</label>
+                <textarea
+                  rows={3}
+                  value={(editingVacancy.offers ?? []).join("\n")}
+                  onChange={(e) =>
+                    setEditingVacancy({ ...editingVacancy, offers: e.target.value.split("\n").filter(Boolean) })
                   }
                   className="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white"
                 />

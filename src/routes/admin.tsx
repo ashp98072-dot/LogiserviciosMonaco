@@ -39,6 +39,24 @@ import VisualSiteEditor from "@/components/VisualSiteEditor";
 import { useSiteData, Vacancy, FleetItem, CustomSection } from "@/context/SiteDataContext";
 import { compressImageFile } from "@/lib/imageUtils";
 
+const ADMIN_SESSION_KEY = "logiservicios_monaco_admin_session_v1";
+const ADMIN_SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+
+function readAdminSession(): boolean {
+  try {
+    const raw = sessionStorage.getItem(ADMIN_SESSION_KEY);
+    if (!raw) return false;
+    const { at } = JSON.parse(raw) as { at?: number };
+    return Boolean(at && Date.now() - at < ADMIN_SESSION_TTL_MS);
+  } catch {
+    return false;
+  }
+}
+
+function writeAdminSession() {
+  sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ at: Date.now() }));
+}
+
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [{ title: "Panel Administrador | LogiServicios Mónaco" }],
@@ -71,9 +89,10 @@ function AdminPage() {
     updateGithubConfig,
     syncToGitHub,
     isSyncing,
+    hasUnpublishedChanges,
   } = useSiteData();
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(readAdminSession);
   const [pinInput, setPinInput] = useState("");
   const [loginError, setLoginError] = useState("");
   const [editorMode, setEditorMode] = useState<"visual" | "classic">("visual");
@@ -108,8 +127,9 @@ function AdminPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (pinInput === siteData.adminPin || pinInput === "1234" || pinInput === "admin123") {
+    if (pinInput === siteData.adminPin) {
       setIsAuthenticated(true);
+      writeAdminSession();
       setLoginError("");
     } else {
       setLoginError("PIN o Contraseña incorrecta.");
@@ -246,6 +266,11 @@ function AdminPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
+              {hasUnpublishedChanges && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold">
+                  Cambios sin publicar en GitHub
+                </span>
+              )}
               <button
                 onClick={async () => {
                   if (!githubConfig.token) {
@@ -2131,6 +2156,22 @@ function AdminPage() {
                     </p>
                   </div>
                 </div>
+
+                <label className="flex items-start gap-3 p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(githubConfig.autoSync)}
+                    onChange={(e) => updateGithubConfig({ autoSync: e.target.checked })}
+                    className="mt-0.5"
+                  />
+                  <span className="text-xs">
+                    <strong className="block text-foreground">Publicar automáticamente en GitHub al guardar</strong>
+                    <span className="text-muted-foreground">
+                      Cuando está activo, cada cambio se sube a GitHub unos segundos después de editar (requiere Token configurado).
+                      Vercel reconstruirá el sitio automáticamente.
+                    </span>
+                  </span>
+                </label>
               </div>
 
               {/* Security settings */}
