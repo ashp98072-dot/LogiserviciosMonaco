@@ -80,7 +80,7 @@ function Page() {
           </h1>
 
           <div className="mt-6 max-w-4xl bg-white/10 backdrop-blur-md p-6 md:p-8 rounded-2xl border border-white/15 shadow-2xl">
-            <p className="text-base md:text-xl text-primary-foreground/95 leading-relaxed font-light">
+            <p className="text-base md:text-xl text-primary-foreground/95 leading-relaxed font-light text-justify">
               En <strong className="font-bold text-white">Logiservicios Mónaco</strong>, somos una empresa guatemalteca especializada en soluciones integrales de transporte, logística y gestión eficiente de recursos. Estamos comprometidos con impulsar la economía circular en el país a través del manejo, recolección y traslado estratégico de materiales reciclables e insumos industriales, asegurando un estricto control y monitoreo, puntualidad y altos estándares de seguridad en cada operación.
             </p>
 
@@ -109,7 +109,7 @@ function Page() {
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-[#D60303] text-white font-black text-xs uppercase tracking-widest mb-6 shadow-sm">
                 <Target className="h-4 w-4" /> Nuestra Misión
               </div>
-              <p className="text-base md:text-lg text-foreground font-medium leading-relaxed">
+              <p className="text-base md:text-lg text-foreground font-medium leading-relaxed text-justify">
                 Brindar soluciones integrales de transporte y logística a nivel nacional e internacional, con altos estándares de calidad, seguridad y puntualidad. Impulsando el crecimiento de nuestros colaboradores para garantizar que nuestros clientes reciban un servicio confiable mediante la innovación constante.
               </p>
             </div>
@@ -126,7 +126,7 @@ function Page() {
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-neutral-900 text-gold font-black text-xs uppercase tracking-widest mb-6 shadow-sm border border-neutral-800">
                 <Eye className="h-4 w-4 text-gold" /> Nuestra Visión
               </div>
-              <p className="text-base md:text-lg text-foreground font-medium leading-relaxed">
+              <p className="text-base md:text-lg text-foreground font-medium leading-relaxed text-justify">
                 Ser la empresa de transporte y logística a nivel nacional e internacional, reconocida por la excelencia de nuestro servicio, la innovación en nuestros procesos, la seguridad de nuestras operaciones y el compromiso con nuestros colaboradores, clientes y el medio ambiente.
               </p>
             </div>
@@ -138,7 +138,7 @@ function Page() {
         </div>
       </section>
 
-      {/* Acrónimo MÓNAC0: IMPULSO */}
+      {/* Acrónimo MÓNACO: IMPULSO */}
       <section className="bg-slate-50/80 dark:bg-neutral-900/40 py-16 md:py-24 border-y border-border">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-12">
@@ -146,9 +146,9 @@ function Page() {
               NUESTRA FILOSOFÍA DE TRABAJO
             </span>
             <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
-              Acrónimo MÓNAC0: IMPULSO
+              Acrónimo MÓNACO: IMPULSO
             </h2>
-            <p className="text-slate-600 dark:text-slate-300 mt-3 text-sm md:text-base leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-300 mt-3 text-sm md:text-base leading-relaxed text-justify">
               Cada letra de la palabra <strong className="text-slate-900 dark:text-white font-bold">IMPULSO</strong> define el marco conceptual sobre el cual construimos nuestras operaciones diarias y guiamos a nuestro equipo.
             </p>
           </div>
@@ -212,7 +212,7 @@ function Page() {
           <div className="text-center max-w-2xl mx-auto mb-12">
             <span className="text-[#D60303] font-black uppercase text-xs tracking-widest">Valores Innegociables</span>
             <h2 className="text-3xl md:text-4xl font-black text-foreground mt-1 uppercase">Principios Mónaco</h2>
-            <p className="text-muted-foreground mt-2 text-sm">
+            <p className="text-muted-foreground mt-2 text-sm text-justify">
               Los 6 principios operacionales que definen nuestra conducta institucional.
             </p>
           </div>

@@ -401,7 +401,7 @@ function Home() {
           <div>
             <span className="text-gold font-semibold uppercase text-sm tracking-wider">La empresa</span>
             <h2 className="mt-2 text-3xl md:text-4xl font-bold">Guatemaltecos moviendo a Guatemala</h2>
-            <p className="mt-4 text-muted-foreground">
+            <p className="mt-4 text-muted-foreground text-justify">
               Logiservicios Mónaco nace para ofrecer un servicio logístico confiable, transparente y a la medida de cada cliente. Combinamos experiencia, tecnología y compromiso humano para entregar resultados que impulsan tu negocio.
             </p>
             <Link to="/filosofia" className="mt-6 inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all">

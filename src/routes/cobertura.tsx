@@ -38,7 +38,7 @@ function Page() {
           <h1 className="mt-2 text-4xl md:text-5xl font-bold">
             {siteData.generalInfo?.coberturaHeroTitle || "Cobertura en todo el país"}
           </h1>
-          <p className="mt-4 max-w-2xl text-primary-foreground/85">
+          <p className="mt-4 max-w-2xl text-primary-foreground/85 text-justify">
             {siteData.generalInfo?.coberturaHeroSubtitle || siteData.generalInfo?.coberturaText || "Movemos tu carga a los 22 departamentos de Guatemala, desde la costa hasta el altiplano y el oriente."}
           </p>
         </div>

@@ -333,7 +333,7 @@ export default function DynamicSections({ page, previewSection, onSelectSection 
                     <span className={`font-semibold uppercase text-xs tracking-wider ${subtitleColorClass}`}>{sec.subtitle}</span>
                   )}
                   <h2 className={`mt-2 ${titleSizeClass} ${titleColorClass}`}>{sec.title}</h2>
-                  <p className={`mt-4 leading-relaxed whitespace-pre-line text-sm md:text-base ${textColorClass}`}>{sec.content}</p>
+                  <p className={`mt-4 leading-relaxed whitespace-pre-line text-sm md:text-base text-justify ${textColorClass}`}>{sec.content}</p>
                   {sec.buttonText && sec.buttonUrl && (
                     <div className="mt-6">
                       {sec.buttonUrl.startsWith("http") ? (
@@ -370,7 +370,7 @@ export default function DynamicSections({ page, previewSection, onSelectSection 
                     <span className={`font-semibold uppercase text-xs tracking-wider ${subtitleColorClass}`}>{sec.subtitle}</span>
                   )}
                   <h2 className={`mt-1 ${titleSizeClass} ${titleColorClass}`}>{sec.title}</h2>
-                  <p className={`mt-4 whitespace-pre-line text-sm md:text-base ${textColorClass}`}>{sec.content}</p>
+                  <p className={`mt-4 whitespace-pre-line text-sm md:text-base text-justify ${textColorClass}`}>{sec.content}</p>
                   <div className="mt-6">{renderMedia()}</div>
                   {sec.buttonText && sec.buttonUrl && (
                     <div className="mt-6">
@@ -408,7 +408,7 @@ export default function DynamicSections({ page, previewSection, onSelectSection 
                   <span className={`font-semibold uppercase text-xs tracking-wider ${subtitleColorClass}`}>{sec.subtitle}</span>
                 )}
                 <h2 className={`mt-2 ${titleSizeClass} ${titleColorClass}`}>{sec.title}</h2>
-                <p className={`mt-4 leading-relaxed whitespace-pre-line text-sm md:text-base ${textColorClass}`}>{sec.content}</p>
+                <p className={`mt-4 leading-relaxed whitespace-pre-line text-sm md:text-base text-justify ${textColorClass}`}>{sec.content}</p>
                 {sec.buttonText && sec.buttonUrl && (
                   <div className="mt-6">
                     {sec.buttonUrl.startsWith("http") ? (
