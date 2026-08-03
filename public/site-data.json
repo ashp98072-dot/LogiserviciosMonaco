@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-03T13:00:00.000Z",
+  "updatedAt": "2026-08-03T13:20:00.000Z",
   "contactInfo": {
     "phone": "+502 4017-5893",
     "whatsappMain": "50240175893",
@@ -158,10 +158,10 @@
     "coberturaText": "Contamos con presencia y rutas estratégicas operativas en los 22 departamentos del territorio nacional de Guatemala."
   },
   "branding": {
-    "logoUrl": "/src/assets/logo.png",
-    "heroBgUrl": "/src/assets/logo_1.png",
-    "warehouseBgUrl": "/src/assets/warehouse.jpg",
-    "coberturaMapUrl": "/src/assets/guatemala-map.jpg"
+    "logoUrl": "/logo.png",
+    "heroBgUrl": "/branding/hero.png",
+    "warehouseBgUrl": "/branding/warehouse.jpg",
+    "coberturaMapUrl": "/branding/guatemala-map.jpg"
   },
   "customSections": [],
   "adminPin": "1234"

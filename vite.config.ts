@@ -25,9 +25,40 @@ function copySiteDataPlugin(): Plugin {
   };
 }
 
+function copyPublicAssetsPlugin(): Plugin {
+  const assetsDir = path.resolve(__dirname, 'src/assets');
+  const publicDir = path.resolve(__dirname, 'public');
+
+  const copyIfExists = (src: string, dest: string) => {
+    if (!fs.existsSync(src)) return;
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.copyFileSync(src, dest);
+  };
+
+  const syncPublicAssets = () => {
+    copyIfExists(path.join(assetsDir, 'logo.png'), path.join(publicDir, 'logo.png'));
+    copyIfExists(path.join(assetsDir, 'favicon.png'), path.join(publicDir, 'favicon.png'));
+    copyIfExists(path.join(assetsDir, 'favicon.png'), path.join(publicDir, 'apple-touch-icon.png'));
+    copyIfExists(path.join(assetsDir, 'logo_1.png'), path.join(publicDir, 'branding/hero.png'));
+    copyIfExists(path.join(assetsDir, 'warehouse.jpg'), path.join(publicDir, 'branding/warehouse.jpg'));
+    copyIfExists(path.join(assetsDir, 'guatemala-map.jpg'), path.join(publicDir, 'branding/guatemala-map.jpg'));
+    copyIfExists(path.join(assetsDir, 'cabezales.png'), path.join(publicDir, 'fleet/cabezales.png'));
+    copyIfExists(path.join(assetsDir, 'Unidades de 12 Ton.png'), path.join(publicDir, 'fleet/unidades-12ton.png'));
+    copyIfExists(path.join(assetsDir, 'Unidades de 5 Ton.png'), path.join(publicDir, 'fleet/unidades-5ton.png'));
+    copyIfExists(path.join(assetsDir, 'Unidades de 2.7 Ton.png'), path.join(publicDir, 'fleet/unidades-2.7ton.png'));
+    copyIfExists(path.join(assetsDir, 'Panel 1.5 Ton.png'), path.join(publicDir, 'fleet/panel-1.5ton.png'));
+    copyIfExists(path.join(assetsDir, 'Panele 1 Ton .png'), path.join(publicDir, 'fleet/panele-1ton.png'));
+  };
+
+  return {
+    name: 'copy-public-assets',
+    buildStart: syncPublicAssets,
+  };
+}
+
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss(), copySiteDataPlugin()],
+    plugins: [react(), tailwindcss(), copyPublicAssetsPlugin(), copySiteDataPlugin()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),

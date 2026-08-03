@@ -435,6 +435,25 @@ function sanitizeVacancies(vacancies: unknown): Vacancy[] {
   });
 }
 
+function sanitizeBranding(branding: Partial<Branding> | undefined): Branding {
+  const isBrokenAssetPath = (url: string | undefined): boolean => {
+    if (!url || !url.trim()) return true;
+    return url.includes("/src/assets/") || url.includes("src/assets/");
+  };
+
+  const resolve = (url: string | undefined, publicPath: string): string => {
+    if (isBrokenAssetPath(url)) return publicPath;
+    return url!.trim();
+  };
+
+  return {
+    logoUrl: resolve(branding?.logoUrl, "/logo.png"),
+    heroBgUrl: resolve(branding?.heroBgUrl, "/branding/hero.png"),
+    warehouseBgUrl: resolve(branding?.warehouseBgUrl, "/branding/warehouse.jpg"),
+    coberturaMapUrl: resolve(branding?.coberturaMapUrl, "/branding/guatemala-map.jpg"),
+  };
+}
+
 function mergeSiteData(raw: Partial<SiteData>): SiteData {
   const contact = { ...DEFAULT_CONTACT_INFO, ...raw.contactInfo };
   if (contact.mapEmbedUrl) {
@@ -447,7 +466,7 @@ function mergeSiteData(raw: Partial<SiteData>): SiteData {
     vacancies: sanitizeVacancies(raw.vacancies),
     fleet: sanitizeFleetImages(raw.fleet || DEFAULT_FLEET),
     generalInfo: { ...DEFAULT_GENERAL_INFO, ...raw.generalInfo },
-    branding: { ...DEFAULT_BRANDING, ...raw.branding },
+    branding: sanitizeBranding({ ...DEFAULT_BRANDING, ...raw.branding }),
     customSections: sanitizeCustomSections(raw.customSections || DEFAULT_CUSTOM_SECTIONS),
     updatedAt: raw.updatedAt,
   };
