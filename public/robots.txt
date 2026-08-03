@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://logiservicios-monaco-web.lovable.app/sitemap.xml
+Sitemap: https://www.logiserviciosmonaco.com/sitemap.xml

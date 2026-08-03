@@ -38,6 +38,7 @@ function copyPublicAssetsPlugin(): Plugin {
   const syncPublicAssets = () => {
     copyIfExists(path.join(assetsDir, 'logo.png'), path.join(publicDir, 'logo.png'));
     copyIfExists(path.join(assetsDir, 'favicon.png'), path.join(publicDir, 'favicon.png'));
+    copyIfExists(path.join(assetsDir, 'favicon.png'), path.join(publicDir, 'favicon.ico'));
     copyIfExists(path.join(assetsDir, 'favicon.png'), path.join(publicDir, 'apple-touch-icon.png'));
     copyIfExists(path.join(assetsDir, 'logo_1.png'), path.join(publicDir, 'branding/hero.png'));
     copyIfExists(path.join(assetsDir, 'warehouse.jpg'), path.join(publicDir, 'branding/warehouse.jpg'));

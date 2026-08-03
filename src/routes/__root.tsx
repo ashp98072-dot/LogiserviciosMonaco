@@ -13,6 +13,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
+const SITE_URL = "https://www.logiserviciosmonaco.com";
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -87,21 +89,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "LogiServicios Mónaco | Servicios de Transporte y Logística en Guatemala" },
       { property: "og:description", content: "Empresa guatemalteca de transporte y logística con cobertura en los 22 departamentos de Guatemala." },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "https://logiservicios-monaco-web.lovable.app/logo.png" },
+      { property: "og:url", content: SITE_URL },
+      { property: "og:image", content: `${SITE_URL}/logo.png` },
       { property: "og:image:alt", content: "Logo LogiServicios Mónaco" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "LogiServicios Mónaco | Transporte y Logística en Guatemala" },
       { name: "twitter:description", content: "Servicios de transporte y logística con cobertura nacional en Guatemala." },
-      { name: "twitter:image", content: "https://logiservicios-monaco-web.lovable.app/logo.png" },
+      { name: "twitter:image", content: `${SITE_URL}/logo.png` },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.png?v=2", type: "image/png" },
-      { rel: "shortcut icon", href: "/favicon.png?v=2", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/logo.png" },
+      { rel: "icon", href: "/favicon.ico", sizes: "any" },
+      { rel: "icon", href: "/favicon.png?v=3", type: "image/png", sizes: "48x48" },
+      { rel: "shortcut icon", href: "/favicon.png?v=3", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=3", sizes: "180x180" },
+      { rel: "manifest", href: "/site.webmanifest" },
     ],
     scripts: [
       {
@@ -110,8 +115,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "LogiServicios Mónaco",
-          url: "https://logiservicios-monaco-web.lovable.app",
-          logo: "https://logiservicios-monaco-web.lovable.app/logo.png",
+          url: SITE_URL,
+          logo: `${SITE_URL}/logo.png`,
+          image: `${SITE_URL}/logo.png`,
           description: "Empresa guatemalteca de transporte y logística con cobertura nacional en los 22 departamentos.",
           areaServed: "GT",
         }),
