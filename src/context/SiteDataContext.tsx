@@ -459,7 +459,7 @@ const GITHUB_CONFIG_KEY = "logiservicios_monaco_github_config_v1";
 
 const DEFAULT_GITHUB_CONFIG: GitHubSyncConfig = {
   token: "",
-  repo: "laulaisha8/logiserviciosmonaco",
+  repo: "ashp98072-dot/LogiserviciosMonaco",
   branch: "main",
   filePath: "site-data.json",
 };
@@ -576,7 +576,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Helper to fetch live fresh data from GitHub raw or site static endpoints with cache-busting
   const fetchFreshDataFromCloud = async (): Promise<SiteData | null> => {
     const timestamp = Date.now();
-    const repo = githubConfig.repo || "laulaisha8/logiserviciosmonaco";
+    const repo = githubConfig.repo || "ashp98072-dot/LogiserviciosMonaco";
     const branch = githubConfig.branch || "main";
     const cleanRepo = repo.replace("https://github.com/", "").replace(".git", "").replace(/^\/+|\/+$/g, "").trim();
 
