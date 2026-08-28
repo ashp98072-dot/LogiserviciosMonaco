@@ -147,8 +147,8 @@ const DEFAULT_BRANDING: Branding = {
 const DEFAULT_CUSTOM_SECTIONS: CustomSection[] = [];
 
 const DEFAULT_CONTACT_INFO: ContactInfo = {
-  phone: "+502 4017-5893",
-  whatsappMain: "50240175893",
+  phone: "+502 3473 5996",
+  whatsappMain: "50234735996",
   whatsappRRHH: "50230137849",
   emailInfo: "info@logiserviciosmonaco.com",
   emailRRHH: "recursoshumanos@logiserviciosmonaco.com",
