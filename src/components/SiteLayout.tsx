@@ -20,7 +20,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
   const siteLogo = siteData.branding?.logoUrl || logo;
 
   const facebookUrl = contact.facebookUrl || "https://www.facebook.com/share/1CirGxQ8no/";
-  const whatsappUrl = `https://wa.me/${contact.whatsappMain || "50240175893"}`;
+  const whatsappUrl = `https://wa.me/${contact.whatsappMain || "50234735996"}`;
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
