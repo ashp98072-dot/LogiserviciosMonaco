@@ -361,7 +361,7 @@ function AdminPage() {
                       updateContactInfo({ whatsappMain: e.target.value });
                       showSuccess("Guardado automáticamente");
                     }}
-                    placeholder="Ejemplo: 50240175893"
+                    placeholder="Ejemplo: 50234735996"
                     className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
                   />
                 </div>
