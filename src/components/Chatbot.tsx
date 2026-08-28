@@ -3,9 +3,9 @@ import { MessageCircle, X, Send, Truck, Phone, Mail } from "lucide-react";
 
 type Msg = { role: "user" | "bot"; text: string; time: string };
 
-const PHONE = "+502 4017-5893";
-const PHONE_TEL = "tel:+50240175893";
-const WHATSAPP = "https://wa.me/50240175893";
+const PHONE = "+502 3473-5996";
+const PHONE_TEL = "tel:+502 3473-5996";
+const WHATSAPP = "https://wa.me/50234735996";
 const EMAIL = "info@logiserviciosmonaco.com";
 
 const GOLD = "#D4AF37";
