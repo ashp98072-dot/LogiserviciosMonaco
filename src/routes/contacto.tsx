@@ -3,6 +3,7 @@ import { Phone, Mail, MapPin, Send, MessageCircle } from "lucide-react";
 import SiteLayout from "@/components/SiteLayout";
 import { useSiteData, extractMapUrl } from "@/context/SiteDataContext";
 import DynamicSections from "@/components/DynamicSections";
+import { useRef, type FormEvent } from "react";
 
 export const Route = createFileRoute("/contacto")({
   head: () => ({
@@ -20,6 +21,31 @@ function Page() {
   const { siteData } = useSiteData();
   const contact = siteData.contactInfo;
   const mapPos = contact.mapPosition || "bottom";
+  const sending = useRef(false);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (sending.current) return;
+    sending.current = true;
+    const form = event.currentTarget;
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+      });
+      const result = await response.json();
+      if (!response.ok || result.success !== true) {
+        throw new Error("Contact request failed");
+      }
+      window.alert("¡Gracias! Hemos recibido tu solicitud. Nuestro equipo te contactará pronto.");
+      form.reset();
+    } catch {
+      window.alert("No pudimos enviar tu solicitud. Por favor, inténtalo más tarde o contáctanos por teléfono.");
+    } finally {
+      sending.current = false;
+    }
+  }
 
   return (
     <SiteLayout>
@@ -64,7 +90,7 @@ function Page() {
             )}
           </div>
 
-          <form action={contact.formspreeUrl || "https://formspree.io/f/xzdndgdq"} method="POST" className="md:col-span-2 rounded-xl border border-border bg-card p-6 md:p-8 shadow-elegant space-y-4">
+          <form action="/api/contact" method="POST" onSubmit={handleSubmit} className="md:col-span-2 rounded-xl border border-border bg-card p-6 md:p-8 shadow-elegant space-y-4">
             <h2 className="text-2xl font-bold">{contact.formTitle || "Solicita tu cotización"}</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <Field label="Nombre" name="nombre" required />
