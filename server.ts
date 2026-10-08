@@ -1,25 +1,15 @@
 import express from "express";
-import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import "dotenv/config";
-import { publishSiteDataToGitHub } from "./lib/publishSiteData.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DATA_FILE = path.join(__dirname, "site-data.json");
-
 async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
-
-  // Support large JSON payloads for base64 images
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
-
-  let inMemoryData: any = null;
 
   // Anti-cache middleware to ensure browsers always get the latest HTML and data on redeploy
   app.use((req, res, next) => {
@@ -29,90 +19,9 @@ async function startServer() {
     next();
   });
 
-  // API endpoint to GET site data
-  app.get("/api/site-data", (req, res) => {
-    try {
-      if (inMemoryData) {
-        return res.json({ success: true, data: inMemoryData });
-      }
-      if (fs.existsSync(DATA_FILE)) {
-        const fileContent = fs.readFileSync(DATA_FILE, "utf-8");
-        inMemoryData = JSON.parse(fileContent);
-        return res.json({ success: true, data: inMemoryData });
-      }
-    } catch (err) {
-      console.error("Error reading site-data.json:", err);
-    }
-    return res.json({ success: true, data: null });
-  });
-
-  // API endpoint to SAVE site data
-  app.post("/api/site-data", (req, res) => {
-    try {
-      const data = req.body;
-      if (data && typeof data === "object") {
-        inMemoryData = data;
-        fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf-8");
-        return res.json({ success: true, message: "Site data saved successfully on server" });
-      } else {
-        return res.status(400).json({ success: false, error: "Invalid data payload" });
-      }
-    } catch (err: any) {
-      console.error("Error writing site-data.json:", err);
-      return res.status(500).json({ success: false, error: err.message || "Failed to save data" });
-    }
-  });
-
-  app.get("/api/publish-status", (_req, res) => {
-    const hasToken = Boolean(process.env.GITHUB_TOKEN?.trim());
-    res.json({
-      serverPublish: hasToken,
-      autoSync: true,
-      configured: {
-        GITHUB_TOKEN: hasToken,
-        GITHUB_REPO: Boolean(process.env.GITHUB_REPO?.trim()),
-        GITHUB_BRANCH: Boolean(process.env.GITHUB_BRANCH?.trim()),
-        CMS_ADMIN_PIN: Boolean(process.env.CMS_ADMIN_PIN?.trim()),
-      },
-    });
-  });
-
-  app.post("/api/publish", async (req, res) => {
-    const githubToken = process.env.GITHUB_TOKEN;
-    if (!githubToken) {
-      return res.status(503).json({
-        success: false,
-        useClient: true,
-        message: "Publicación automática no configurada en el servidor.",
-      });
-    }
-
-    const expectedPin = process.env.CMS_ADMIN_PIN;
-    const bodyPin = typeof req.body?.pin === "string" ? req.body.pin : "";
-    if (expectedPin && bodyPin !== expectedPin) {
-      return res.status(401).json({ success: false, message: "PIN de administrador incorrecto." });
-    }
-
-    const data = req.body?.data;
-    if (!data || typeof data !== "object") {
-      return res.status(400).json({ success: false, message: "Datos del sitio inválidos." });
-    }
-
-    const repo = process.env.GITHUB_REPO || "ashp98072-dot/LogiserviciosMonaco";
-    const branch = process.env.GITHUB_BRANCH || "main";
-    const filePath = process.env.GITHUB_FILE_PATH || "site-data.json";
-
-    try {
-      const result = await publishSiteDataToGitHub(data, {
-        token: githubToken,
-        repo,
-        branch,
-        filePath,
-      });
-      return res.status(result.success ? 200 : 502).json(result);
-    } catch (err: any) {
-      return res.status(500).json({ success: false, message: err.message || "Error al publicar" });
-    }
+  // Unknown APIs must not fall through to the SPA HTML response.
+  app.use("/api", (_req, res) => {
+    res.status(404).json({ message: "Not found" });
   });
 
   // Vite middleware for development or static serving for production
