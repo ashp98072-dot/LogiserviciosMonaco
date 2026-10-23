@@ -1,11 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles, CheckCircle2, Video } from "lucide-react";
-import { useSiteData, CustomSection } from "@/context/SiteDataContext";
+import { useSiteData } from "@/context/SiteDataContext";
 
 interface DynamicSectionsProps {
   page: "inicio" | "quienes-somos" | "cobertura" | "trabaja" | "contacto" | "todas";
-  previewSection?: CustomSection; // For live editing preview
-  onSelectSection?: (section: CustomSection) => void; // For live editor interactive clicking
 }
 
 function getEmbedVideoUrl(url: string | undefined): string | null {
@@ -74,19 +72,17 @@ function getTitleSizeClass(size?: string) {
   }
 }
 
-export default function DynamicSections({ page, previewSection, onSelectSection }: DynamicSectionsProps) {
+export default function DynamicSections({ page }: DynamicSectionsProps) {
   const { siteData } = useSiteData();
 
-  const sections = previewSection
-    ? [previewSection]
-    : (siteData.customSections || [])
-        .filter((sec) => sec.active !== false)
-        .filter((sec) => {
-          if (page === "todas") return true;
-          if (!sec.pageTarget) return page === "inicio";
-          return sec.pageTarget === page || sec.pageTarget === "todas";
-        })
-        .sort((a, b) => (a.order || 0) - (b.order || 0));
+  const sections = (siteData.customSections || [])
+    .filter((sec) => sec.active !== false)
+    .filter((sec) => {
+      if (page === "todas") return true;
+      if (!sec.pageTarget) return page === "inicio";
+      return sec.pageTarget === page || sec.pageTarget === "todas";
+    })
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
 
   if (sections.length === 0) return null;
 
@@ -109,24 +105,6 @@ export default function DynamicSections({ page, previewSection, onSelectSection 
         const textColorClass = getTextColorClass(sec.textColor, isDark || isGold);
         const fontFamilyClass = getFontFamilyClass(sec.fontFamily);
         const titleSizeClass = getTitleSizeClass(sec.titleSize);
-
-        const wrapInteractive = (content: React.ReactNode) => {
-          if (!onSelectSection) return content;
-          return (
-            <div
-              key={sec.id}
-              onClick={() => onSelectSection(sec)}
-              className="relative group cursor-pointer"
-            >
-              {content}
-              <div className="absolute inset-0 bg-gold/15 border-2 border-gold opacity-0 group-hover:opacity-100 transition z-20 pointer-events-none flex items-center justify-center">
-                <span className="bg-neutral-900 text-gold font-bold text-xs px-3.5 py-2 rounded-xl shadow-2xl border border-gold/50 flex items-center gap-1.5">
-                  ✏️ Clic para editar bloque: {sec.title}
-                </span>
-              </div>
-            </div>
-          );
-        };
 
         // Media Element (Image or Video)
         const renderMedia = () => {
@@ -172,7 +150,7 @@ export default function DynamicSections({ page, previewSection, onSelectSection 
 
         // Video Block / Hero Video
         if (sec.layoutStyle === "video") {
-          return wrapInteractive(
+          return (
             <section key={sec.id} className={`${bgClass} ${fontFamilyClass} relative overflow-hidden`}>
               <div className="max-w-5xl mx-auto px-4 text-center space-y-6">
                 {sec.subtitle && (
@@ -219,7 +197,7 @@ export default function DynamicSections({ page, previewSection, onSelectSection 
             ? sec.featuresList
             : sec.content.split("\n").filter((line) => line.trim() !== "");
 
-          return wrapInteractive(
+          return (
             <section key={sec.id} className={`${bgClass} ${fontFamilyClass}`}>
               <div className="max-w-7xl mx-auto px-4 space-y-8">
                 <div className="text-center max-w-3xl mx-auto">
@@ -243,7 +221,7 @@ export default function DynamicSections({ page, previewSection, onSelectSection 
 
         // Stats Block
         if (sec.layoutStyle === "stats") {
-          return wrapInteractive(
+          return (
             <section key={sec.id} className={`${bgClass} ${fontFamilyClass} py-12`}>
               <div className="max-w-7xl mx-auto px-4 text-center">
                 {sec.title && <h2 className={`${titleSizeClass} ${titleColorClass} mb-8`}>{sec.title}</h2>}
@@ -282,7 +260,7 @@ export default function DynamicSections({ page, previewSection, onSelectSection 
         }
 
         if (sec.layoutStyle === "banner") {
-          return wrapInteractive(
+          return (
             <section key={sec.id} className={`${bgClass} ${fontFamilyClass} relative overflow-hidden`}>
               {sec.imageUrl && (
                 <div className="absolute inset-0 opacity-20">
@@ -324,7 +302,7 @@ export default function DynamicSections({ page, previewSection, onSelectSection 
         }
 
         if (sec.layoutStyle === "text-right") {
-          return wrapInteractive(
+          return (
             <section key={sec.id} className={`${bgClass} ${fontFamilyClass}`}>
               <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
                 <div>{renderMedia()}</div>
@@ -362,7 +340,7 @@ export default function DynamicSections({ page, previewSection, onSelectSection 
         }
 
         if (sec.layoutStyle === "card") {
-          return wrapInteractive(
+          return (
             <section key={sec.id} className={`${bgClass} ${fontFamilyClass}`}>
               <div className="max-w-5xl mx-auto px-4">
                 <div className="rounded-2xl border border-border bg-card p-8 md:p-12 shadow-elegant">
@@ -400,7 +378,7 @@ export default function DynamicSections({ page, previewSection, onSelectSection 
         }
 
         // Default: text-left
-        return wrapInteractive(
+        return (
           <section key={sec.id} className={`${bgClass} ${fontFamilyClass}`}>
             <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
               <div>

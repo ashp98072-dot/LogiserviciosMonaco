@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
-import { getAdminPinFromSession } from "@/lib/adminSession";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 // Default images imports
 import logoImg from "@/assets/logo.png";
@@ -24,7 +23,6 @@ export interface ContactInfo {
   facebookUrl: string;
   schedule: string;
   formTitle?: string;
-  formspreeUrl?: string;
   showMap?: boolean;
   mapEmbedUrl?: string;
   mapPosition?: "top" | "bottom" | "sidebar";
@@ -118,14 +116,6 @@ export interface CustomSection {
   textAlignment?: "left" | "center" | "right";
 }
 
-export interface GitHubSyncConfig {
-  token: string;
-  repo: string;
-  branch: string;
-  filePath: string;
-  autoSync?: boolean;
-}
-
 export interface SiteData {
   contactInfo: ContactInfo;
   vacancies: Vacancy[];
@@ -133,7 +123,6 @@ export interface SiteData {
   generalInfo: GeneralInfo;
   branding: Branding;
   customSections: CustomSection[];
-  adminPin: string;
   updatedAt?: string;
 }
 
@@ -156,7 +145,6 @@ const DEFAULT_CONTACT_INFO: ContactInfo = {
   facebookUrl: "https://www.facebook.com/share/1CirGxQ8no/",
   schedule: "Lunes a Viernes: 8:00 AM - 5:00 PM | Sábados: 8:00 AM - 12:00 PM",
   formTitle: "Solicita tu cotización",
-  formspreeUrl: "https://formspree.io/f/xzdndgdq",
   showMap: true,
   mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.559631403319!2d-90.55295749999999!3d14.567157199999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8589a11b33260bfb%3A0x55b9abd2a7a13cf4!2sColonia%20La%20Colina!5e0!3m2!1ses-419!2sgt!4v1785247597819!5m2!1ses-419!2sgt",
   mapPosition: "bottom",
@@ -322,47 +310,10 @@ const DEFAULT_SITE_DATA: SiteData = {
   generalInfo: DEFAULT_GENERAL_INFO,
   branding: DEFAULT_BRANDING,
   customSections: DEFAULT_CUSTOM_SECTIONS,
-  adminPin: "1234",
 };
 
 interface SiteDataContextType {
   siteData: SiteData;
-  isSyncing: boolean;
-  lastSyncedAt: string | null;
-  githubConfig: GitHubSyncConfig;
-  updateGithubConfig: (cfg: Partial<GitHubSyncConfig>) => void;
-  syncToGitHub: (
-    customConfig?: Partial<GitHubSyncConfig>,
-    dataOverride?: SiteData,
-  ) => Promise<{ success: boolean; message: string }>;
-  syncWithServer: (customData?: SiteData) => Promise<boolean>;
-  hasUnpublishedChanges: boolean;
-  lastGitHubPublishedAt: string | null;
-  serverPublishAvailable: boolean;
-  canPublishGlobally: boolean;
-  publishConfigStatus: Record<string, boolean> | null;
-  exportData: () => void;
-  updateContactInfo: (info: Partial<ContactInfo>) => void;
-  updateVacancy: (id: string, updated: Partial<Vacancy>) => void;
-  addVacancy: (vacancy: Omit<Vacancy, "id">) => void;
-  deleteVacancy: (id: string) => void;
-  moveVacancy: (id: string, direction: "up" | "down") => void;
-  setVacancies: (vacancies: Vacancy[]) => void;
-  updateFleetItem: (id: string, updated: Partial<FleetItem>) => void;
-  addFleetItem: (item: Omit<FleetItem, "id">) => void;
-  deleteFleetItem: (id: string) => void;
-  moveFleetItem: (id: string, direction: "up" | "down") => void;
-  setFleet: (fleet: FleetItem[]) => void;
-  updateGeneralInfo: (info: Partial<GeneralInfo>) => void;
-  updateBranding: (branding: Partial<Branding>) => void;
-  addCustomSection: (section: Omit<CustomSection, "id">) => void;
-  updateCustomSection: (id: string, updated: Partial<CustomSection>) => void;
-  deleteCustomSection: (id: string) => void;
-  moveCustomSection: (id: string, direction: "up" | "down") => void;
-  setCustomSections: (sections: CustomSection[]) => void;
-  setAdminPin: (pin: string) => void;
-  resetToDefaults: () => void;
-  importData: (data: SiteData) => void;
 }
 
 const SiteDataContext = createContext<SiteDataContextType | undefined>(undefined);
@@ -524,663 +475,50 @@ function mergeSiteData(raw: Partial<SiteData>): SiteData {
   };
 }
 
-const LOCAL_STORAGE_KEY = "logiservicios_monaco_cms_data_v2";
-const LOCAL_STORAGE_META_KEY = "logiservicios_monaco_cms_updated_at_v1";
-const GITHUB_CONFIG_KEY = "logiservicios_monaco_github_config_v1";
-const GITHUB_PUBLISHED_AT_KEY = "logiservicios_monaco_github_published_at_v1";
-
-const DEFAULT_GITHUB_CONFIG: GitHubSyncConfig = {
-  token: "",
-  repo: "ashp98072-dot/LogiserviciosMonaco",
-  branch: "main",
-  filePath: "site-data.json",
-  autoSync: true,
-};
-
-function githubAuthHeader(token: string): string {
-  return token.startsWith("ghp_") || token.startsWith("github_pat_")
-    ? `Bearer ${token}`
-    : `token ${token}`;
-}
-
+// Public content is read from the deployed file, with defaults on load failure.
 export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isSyncing, setIsSyncing] = useState<boolean>(false);
-  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const skipTimestampBumpRef = useRef(false);
-
-  const [lastGitHubPublishedAt, setLastGitHubPublishedAt] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem(GITHUB_PUBLISHED_AT_KEY);
-    } catch {
-      return null;
-    }
-  });
-  const githubSyncInFlightRef = useRef(false);
-  const [serverPublishAvailable, setServerPublishAvailable] = useState(false);
-  const [publishConfigStatus, setPublishConfigStatus] = useState<Record<string, boolean> | null>(null);
-
-  const [githubConfig, setGithubConfig] = useState<GitHubSyncConfig>(() => {
-    try {
-      const saved = localStorage.getItem(GITHUB_CONFIG_KEY);
-      if (saved) {
-        return { ...DEFAULT_GITHUB_CONFIG, ...JSON.parse(saved) };
-      }
-    } catch (e) {}
-    return DEFAULT_GITHUB_CONFIG;
-  });
-
-  const updateGithubConfig = (cfg: Partial<GitHubSyncConfig>) => {
-    setGithubConfig((prev) => {
-      const updated = { ...prev, ...cfg };
-      localStorage.setItem(GITHUB_CONFIG_KEY, JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const applyPublishSuccess = (payload: SiteData, updatedAt: string) => {
-    setSiteData((prev) => ({ ...prev, updatedAt }));
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
-    localStorage.setItem(LOCAL_STORAGE_META_KEY, updatedAt);
-    localStorage.setItem(GITHUB_PUBLISHED_AT_KEY, updatedAt);
-    setLastGitHubPublishedAt(updatedAt);
-    setLastSyncedAt(new Date().toLocaleTimeString());
-  };
-
-  const syncToGitHub = async (
-    customConfig?: Partial<GitHubSyncConfig>,
-    dataOverride?: SiteData,
-  ): Promise<{ success: boolean; message: string }> => {
-    if (githubSyncInFlightRef.current) {
-      return { success: false, message: "Ya hay una publicación en curso. Espera un momento." };
-    }
-    githubSyncInFlightRef.current = true;
-    setIsSyncing(true);
-
-    const sourceData = dataOverride || siteData;
-    const payload: SiteData = { ...sourceData, updatedAt: new Date().toISOString() };
-
-    try {
-      const serverRes = await fetch("/api/publish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          data: payload,
-          pin: getAdminPinFromSession(),
-        }),
-      });
-
-      const serverJson = (await serverRes.json().catch(() => ({}))) as {
-        success?: boolean;
-        message?: string;
-        updatedAt?: string;
-        useClient?: boolean;
-      };
-
-      if (serverRes.ok && serverJson.success) {
-        applyPublishSuccess(payload, serverJson.updatedAt || payload.updatedAt!);
-        setIsSyncing(false);
-        githubSyncInFlightRef.current = false;
-        return {
-          success: true,
-          message: serverJson.message || "¡Sitio web actualizado para todos!",
-        };
-      }
-
-      if (serverRes.status !== 503 || !serverJson.useClient) {
-        setIsSyncing(false);
-        githubSyncInFlightRef.current = false;
-        return {
-          success: false,
-          message: serverJson.message || "No se pudo publicar. Intenta de nuevo.",
-        };
-      }
-    } catch {
-      // Fall through to client-side publish if server unavailable
-    }
-
-    const cfg = { ...githubConfig, ...customConfig };
-    if (!cfg.token || !cfg.repo) {
-      setIsSyncing(false);
-      githubSyncInFlightRef.current = false;
-      return {
-        success: false,
-        message:
-          "No se pudo publicar en el sitio web. Contacta al administrador para activar la publicación automática.",
-      };
-    }
-
-    try {
-      const cleanRepo = cfg.repo.replace("https://github.com/", "").replace(".git", "").replace(/^\/+|\/+$/g, "").trim();
-      const filePath = cfg.filePath || "site-data.json";
-      const branch = cfg.branch || "main";
-      const authHeader = githubAuthHeader(cfg.token);
-
-      let sha: string | undefined = undefined;
-      try {
-        const getRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${filePath}?ref=${branch}`, {
-          headers: {
-            Authorization: authHeader,
-            Accept: "application/vnd.github.v3+json",
-          },
-        });
-        if (getRes.ok) {
-          const fileData = await getRes.json();
-          sha = fileData.sha;
-        }
-      } catch {
-        // file doesn't exist yet or new repo
-      }
-
-      const jsonString = JSON.stringify(payload, null, 2);
-      const utf8Bytes = new TextEncoder().encode(jsonString);
-      let binary = "";
-      for (let i = 0; i < utf8Bytes.length; i++) {
-        binary += String.fromCharCode(utf8Bytes[i]);
-      }
-      const base64Content = btoa(binary);
-
-      const putRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${filePath}`, {
-        method: "PUT",
-        headers: {
-          Authorization: authHeader,
-          Accept: "application/vnd.github.v3+json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: `Actualización CMS Logiservicios Monaco (${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()})`,
-          content: base64Content,
-          sha: sha,
-          branch: branch,
-        }),
-      });
-
-      if (putRes.ok) {
-        applyPublishSuccess(payload, payload.updatedAt!);
-        setIsSyncing(false);
-        githubSyncInFlightRef.current = false;
-        return {
-          success: true,
-          message: "¡Sitio web actualizado! Los cambios ya están en línea para todos.",
-        };
-      }
-
-      const errData = await putRes.json().catch(() => ({ message: "Respuesta no válida" }));
-      setIsSyncing(false);
-      githubSyncInFlightRef.current = false;
-      return {
-        success: false,
-        message: `Error de GitHub (${putRes.status}): ${errData.message || "Verifica permisos de escritura."}`,
-      };
-    } catch (err: any) {
-      setIsSyncing(false);
-      githubSyncInFlightRef.current = false;
-      return {
-        success: false,
-        message: `Error de red al publicar: ${err.message || err}`,
-      };
-    }
-  };
-
   const [siteData, setSiteData] = useState<SiteData>(DEFAULT_SITE_DATA);
 
-  // Helper to fetch live fresh data from GitHub raw or site static endpoints with cache-busting
-  const fetchFreshDataFromCloud = async (): Promise<SiteData | null> => {
-    const timestamp = Date.now();
-    const repo = githubConfig.repo || "ashp98072-dot/LogiserviciosMonaco";
-    const branch = githubConfig.branch || "main";
-    const cleanRepo = repo.replace("https://github.com/", "").replace(".git", "").replace(/^\/+|\/+$/g, "").trim();
+  useEffect(() => {
+    // Remove data left by the retired editor, including its stored credentials.
+    try {
+      for (const key of [
+        "logiservicios_monaco_cms_data_v1",
+        "logiservicios_monaco_cms_data_v2",
+        "logiservicios_monaco_cms_updated_at_v1",
+        "logiservicios_monaco_github_config_v1",
+        "logiservicios_monaco_github_published_at_v1",
+      ]) localStorage.removeItem(key);
+      sessionStorage.removeItem("logiservicios_monaco_admin_session_v1");
+    } catch {
+      // Storage may be disabled; public content does not depend on it.
+    }
 
-    const endpoints = [
-      `/site-data.json?t=${timestamp}`,
-      `https://raw.githubusercontent.com/${cleanRepo}/${branch}/site-data.json?t=${timestamp}`,
-      `/api/site-data?t=${timestamp}`,
-    ];
-
-    const candidates: SiteData[] = [];
-
-    for (const url of endpoints) {
+    const controller = new AbortController();
+    async function loadData() {
       try {
-        const res = await fetch(url, {
+        const response = await fetch("/site-data.json", {
           cache: "no-store",
-          headers: {
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
-          },
+          signal: controller.signal,
         });
-        if (res.ok) {
-          const text = await res.text();
-          let dataJson: unknown = null;
-          try {
-            dataJson = JSON.parse(text);
-          } catch {
-            continue;
-          }
-          if (dataJson && typeof dataJson === "object") {
-            const rawData = (dataJson as { data?: SiteData }).data || (dataJson as SiteData);
-            if (rawData && typeof rawData === "object" && (rawData.contactInfo || rawData.vacancies || rawData.fleet)) {
-              candidates.push(mergeSiteData(rawData));
-            }
-          }
+        if (!response.ok) return;
+        const data: unknown = await response.json();
+        if (!controller.signal.aborted && data && typeof data === "object" && !Array.isArray(data)) {
+          setSiteData(mergeSiteData(data as Partial<SiteData>));
         }
       } catch {
-        // Try next endpoint
+        // Keep the existing defaults if the static file is unavailable.
       }
     }
-
-    if (candidates.length === 0) return null;
-
-    return candidates.reduce((best, current) => {
-      const bestAt = best.updatedAt || "";
-      const currentAt = current.updatedAt || "";
-      return currentAt >= bestAt ? current : best;
-    });
-  };
-
-  const applyCloudData = (liveData: SiteData) => {
-    setSiteData((prev) => {
-      const cachedAt = localStorage.getItem(LOCAL_STORAGE_META_KEY) || "";
-      const liveAt = liveData.updatedAt || "";
-      const shouldApply =
-        !cachedAt ||
-        !liveAt ||
-        liveAt >= cachedAt ||
-        JSON.stringify(prev) === JSON.stringify(DEFAULT_SITE_DATA);
-
-      if (!shouldApply) return prev;
-
-      skipTimestampBumpRef.current = true;
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(liveData));
-      if (liveAt) {
-        localStorage.setItem(LOCAL_STORAGE_META_KEY, liveAt);
-      }
-      setLastSyncedAt(new Date().toLocaleTimeString());
-      return liveData;
-    });
-  };
-
-  const loadCachedData = (): SiteData | null => {
-    try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (saved) {
-        return mergeSiteData(JSON.parse(saved));
-      }
-    } catch (e) {
-      console.error("Error loading saved site data from localStorage:", e);
-    }
-    return null;
-  };
-
-  // Fetch from server / GitHub on load and poll periodically so ALL devices stay synchronized in real time
-  useEffect(() => {
-    let isMounted = true;
-
-    // Clear legacy storage v1 to prevent stale data retention on old devices
-    localStorage.removeItem("logiservicios_monaco_cms_data_v1");
-
-    async function loadLiveData() {
-      const liveData = await fetchFreshDataFromCloud();
-      if (!isMounted) return;
-
-      if (liveData) {
-        applyCloudData(liveData);
-        if (liveData.updatedAt && !localStorage.getItem(GITHUB_PUBLISHED_AT_KEY)) {
-          localStorage.setItem(GITHUB_PUBLISHED_AT_KEY, liveData.updatedAt);
-          setLastGitHubPublishedAt(liveData.updatedAt);
-        }
-      } else {
-        const cached = loadCachedData();
-        if (cached) {
-          setSiteData((prev) => (JSON.stringify(prev) === JSON.stringify(DEFAULT_SITE_DATA) ? cached : prev));
-        }
-      }
-
-      setIsInitialized(true);
-    }
-
-    loadLiveData();
-
-    // Poll every 15 seconds for live synchronization across devices
-    const intervalId = setInterval(loadLiveData, 15000);
-
-    // Also re-fetch immediately when user returns to window/tab
-    const handleFocus = () => {
-      loadLiveData();
-    };
-    window.addEventListener("focus", handleFocus);
-
-    return () => {
-      isMounted = false;
-      clearInterval(intervalId);
-      window.removeEventListener("focus", handleFocus);
-    };
-  }, [githubConfig.repo, githubConfig.branch]);
-
-  useEffect(() => {
-    fetch("/api/publish-status", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && typeof data.serverPublish === "boolean") {
-          setServerPublishAvailable(data.serverPublish);
-        }
-        if (data?.configured && typeof data.configured === "object") {
-          setPublishConfigStatus(data.configured as Record<string, boolean>);
-        }
-      })
-      .catch(() => setServerPublishAvailable(false));
+    void loadData();
+    return () => controller.abort();
   }, []);
 
-  const canPublishGlobally =
-    serverPublishAvailable || Boolean(githubConfig.token && githubConfig.repo);
-
-  const hasUnpublishedChanges = Boolean(
-    canPublishGlobally &&
-      siteData.updatedAt &&
-      siteData.updatedAt !== (lastGitHubPublishedAt || ""),
-  );
-
-  // Save to server API function
-  const syncWithServer = async (customData?: SiteData): Promise<boolean> => {
-    const dataToSave = customData || siteData;
-    setIsSyncing(true);
-    try {
-      const res = await fetch("/api/site-data", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataToSave),
-      });
-      const contentType = res.headers.get("content-type") || "";
-      if (res.ok && contentType.includes("application/json")) {
-        const json = await res.json();
-        if (json && json.success) {
-          setLastSyncedAt(new Date().toLocaleTimeString());
-          setIsSyncing(false);
-          return true;
-        }
-      }
-    } catch (err) {
-      // Static hostings like GitHub pages/Netlify static don't run POST server endpoints
-    }
-    setIsSyncing(false);
-    return false;
-  };
-
-  // Sync to localStorage immediately & server with debounce
-  useEffect(() => {
-    if (!isInitialized) return;
-
-    const dataToPersist = skipTimestampBumpRef.current
-      ? siteData
-      : { ...siteData, updatedAt: new Date().toISOString() };
-    skipTimestampBumpRef.current = false;
-
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToPersist));
-      if (dataToPersist.updatedAt) {
-        localStorage.setItem(LOCAL_STORAGE_META_KEY, dataToPersist.updatedAt);
-      }
-    } catch (e) {
-      console.error("Error saving site data to localStorage:", e);
-    }
-
-    const serverTimer = setTimeout(() => {
-      syncWithServer(dataToPersist);
-    }, 1500);
-
-    let githubTimer: ReturnType<typeof setTimeout> | undefined;
-    if (githubConfig.autoSync !== false && canPublishGlobally) {
-      githubTimer = setTimeout(async () => {
-        const publishedAt = localStorage.getItem(GITHUB_PUBLISHED_AT_KEY) || "";
-        if (publishedAt && dataToPersist.updatedAt && publishedAt >= dataToPersist.updatedAt) return;
-        const res = await syncToGitHub(undefined, dataToPersist);
-        if (!res.success) {
-          console.warn("Auto-publicación:", res.message);
-        }
-      }, 4000);
-    }
-
-    return () => {
-      clearTimeout(serverTimer);
-      if (githubTimer) clearTimeout(githubTimer);
-    };
-  }, [
-    siteData,
-    isInitialized,
-    githubConfig.autoSync,
-    githubConfig.token,
-    githubConfig.repo,
-    canPublishGlobally,
-  ]);
-
-  const updateContactInfo = (info: Partial<ContactInfo>) => {
-    const updatedInfo = { ...info };
-    if (updatedInfo.mapEmbedUrl) {
-      updatedInfo.mapEmbedUrl = extractMapUrl(updatedInfo.mapEmbedUrl);
-    }
-    setSiteData((prev) => ({
-      ...prev,
-      contactInfo: { ...prev.contactInfo, ...updatedInfo },
-    }));
-  };
-
-  const updateVacancy = (id: string, updated: Partial<Vacancy>) => {
-    setSiteData((prev) => ({
-      ...prev,
-      vacancies: prev.vacancies.map((v) => (v.id === id ? { ...v, ...updated } : v)),
-    }));
-  };
-
-  const addVacancy = (vacancyData: Omit<Vacancy, "id">) => {
-    const id = "vac-" + Date.now();
-    const newVacancy: Vacancy = { ...vacancyData, id };
-    setSiteData((prev) => ({
-      ...prev,
-      vacancies: [newVacancy, ...prev.vacancies],
-    }));
-  };
-
-  const deleteVacancy = (id: string) => {
-    setSiteData((prev) => ({
-      ...prev,
-      vacancies: prev.vacancies.filter((v) => v.id !== id),
-    }));
-  };
-
-  const moveVacancy = (id: string, direction: "up" | "down") => {
-    setSiteData((prev) => {
-      const list = [...prev.vacancies];
-      const index = list.findIndex((v) => v.id === id);
-      if (index === -1) return prev;
-      const targetIndex = direction === "up" ? index - 1 : index + 1;
-      if (targetIndex < 0 || targetIndex >= list.length) return prev;
-
-      const temp = list[index];
-      list[index] = list[targetIndex];
-      list[targetIndex] = temp;
-
-      return { ...prev, vacancies: list };
-    });
-  };
-
-  const updateFleetItem = (id: string, updated: Partial<FleetItem>) => {
-    setSiteData((prev) => ({
-      ...prev,
-      fleet: prev.fleet.map((f) => (f.id === id ? { ...f, ...updated } : f)),
-    }));
-  };
-
-  const addFleetItem = (itemData: Omit<FleetItem, "id">) => {
-    const id = "fleet-" + Date.now();
-    const newItem: FleetItem = { ...itemData, id };
-    setSiteData((prev) => ({
-      ...prev,
-      fleet: [...prev.fleet, newItem],
-    }));
-  };
-
-  const deleteFleetItem = (id: string) => {
-    setSiteData((prev) => ({
-      ...prev,
-      fleet: prev.fleet.filter((f) => f.id !== id),
-    }));
-  };
-
-  const moveFleetItem = (id: string, direction: "up" | "down") => {
-    setSiteData((prev) => {
-      const list = [...prev.fleet];
-      const index = list.findIndex((item) => item.id === id);
-      if (index === -1) return prev;
-      const targetIndex = direction === "up" ? index - 1 : index + 1;
-      if (targetIndex < 0 || targetIndex >= list.length) return prev;
-
-      const temp = list[index];
-      list[index] = list[targetIndex];
-      list[targetIndex] = temp;
-
-      return { ...prev, fleet: list };
-    });
-  };
-
-  const updateGeneralInfo = (info: Partial<GeneralInfo>) => {
-    setSiteData((prev) => ({
-      ...prev,
-      generalInfo: { ...prev.generalInfo, ...info },
-    }));
-  };
-
-  const updateBranding = (branding: Partial<Branding>) => {
-    setSiteData((prev) => ({
-      ...prev,
-      branding: { ...prev.branding, ...branding },
-    }));
-  };
-
-  const addCustomSection = (sectionData: Omit<CustomSection, "id">) => {
-    const id = "sec-" + Date.now();
-    const newSection: CustomSection = { ...sectionData, id };
-    setSiteData((prev) => ({
-      ...prev,
-      customSections: [...prev.customSections, newSection],
-    }));
-  };
-
-  const updateCustomSection = (id: string, updated: Partial<CustomSection>) => {
-    setSiteData((prev) => ({
-      ...prev,
-      customSections: prev.customSections.map((s) => (s.id === id ? { ...s, ...updated } : s)),
-    }));
-  };
-
-  const deleteCustomSection = (id: string) => {
-    setSiteData((prev) => ({
-      ...prev,
-      customSections: prev.customSections.filter((s) => s.id !== id),
-    }));
-  };
-
-  const moveCustomSection = (id: string, direction: "up" | "down") => {
-    setSiteData((prev) => {
-      const sections = [...prev.customSections].sort((a, b) => (a.order || 0) - (b.order || 0));
-      const index = sections.findIndex((s) => s.id === id);
-      if (index === -1) return prev;
-      const targetIndex = direction === "up" ? index - 1 : index + 1;
-      if (targetIndex < 0 || targetIndex >= sections.length) return prev;
-
-      const temp = sections[index];
-      sections[index] = sections[targetIndex];
-      sections[targetIndex] = temp;
-
-      const updated = sections.map((s, idx) => ({ ...s, order: idx + 1 }));
-      return { ...prev, customSections: updated };
-    });
-  };
-
-  const setVacancies = (vacancies: Vacancy[]) => {
-    setSiteData((prev) => ({ ...prev, vacancies }));
-  };
-
-  const setFleet = (fleet: FleetItem[]) => {
-    setSiteData((prev) => ({ ...prev, fleet }));
-  };
-
-  const setCustomSections = (customSections: CustomSection[]) => {
-    setSiteData((prev) => ({ ...prev, customSections }));
-  };
-
-  const setAdminPin = (pin: string) => {
-    setSiteData((prev) => ({ ...prev, adminPin: pin }));
-  };
-
-  const resetToDefaults = () => {
-    setSiteData(DEFAULT_SITE_DATA);
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-    localStorage.removeItem(LOCAL_STORAGE_META_KEY);
-  };
-
-  const exportData = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(siteData, null, 2));
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `logiservicios_monaco_backup_${new Date().toISOString().slice(0, 10)}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-  };
-
-  const importData = (data: SiteData) => {
-    const merged = mergeSiteData(data);
-    setSiteData(merged);
-    syncWithServer(merged);
-  };
-
-  return (
-    <SiteDataContext.Provider
-      value={{
-        siteData,
-        isSyncing,
-        lastSyncedAt,
-        githubConfig,
-        updateGithubConfig,
-        syncToGitHub,
-        syncWithServer,
-        hasUnpublishedChanges,
-        lastGitHubPublishedAt,
-        serverPublishAvailable,
-        canPublishGlobally,
-        publishConfigStatus,
-        exportData,
-        updateContactInfo,
-        updateVacancy,
-        addVacancy,
-        deleteVacancy,
-        moveVacancy,
-        setVacancies,
-        updateFleetItem,
-        addFleetItem,
-        deleteFleetItem,
-        moveFleetItem,
-        setFleet,
-        updateGeneralInfo,
-        updateBranding,
-        addCustomSection,
-        updateCustomSection,
-        deleteCustomSection,
-        moveCustomSection,
-        setCustomSections,
-        setAdminPin,
-        resetToDefaults,
-        importData,
-      }}
-    >
-      {children}
-    </SiteDataContext.Provider>
-  );
+  return <SiteDataContext.Provider value={{ siteData }}>{children}</SiteDataContext.Provider>;
 };
 
 export const useSiteData = () => {
   const context = useContext(SiteDataContext);
-  if (!context) {
-    throw new Error("useSiteData must be used within a SiteDataProvider");
-  }
+  if (!context) throw new Error("useSiteData must be used within a SiteDataProvider");
   return context;
 };

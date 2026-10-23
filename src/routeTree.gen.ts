@@ -9,55 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as VisionRouteImport } from './routes/vision'
-import { Route as TrabajaConNosotrosRouteImport } from './routes/trabaja-con-nosotros'
-import { Route as QuienesSomosRouteImport } from './routes/quienes-somos'
-import { Route as MisionRouteImport } from './routes/mision'
-import { Route as GraciasRouteImport } from './routes/gracias'
-import { Route as FilosofiaRouteImport } from './routes/filosofia'
-import { Route as ContactoRouteImport } from './routes/contacto'
-import { Route as CoberturaRouteImport } from './routes/cobertura'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CoberturaRouteImport } from './routes/cobertura'
+import { Route as ContactoRouteImport } from './routes/contacto'
+import { Route as FilosofiaRouteImport } from './routes/filosofia'
+import { Route as GraciasRouteImport } from './routes/gracias'
+import { Route as MisionRouteImport } from './routes/mision'
+import { Route as QuienesSomosRouteImport } from './routes/quienes-somos'
+import { Route as TrabajaConNosotrosRouteImport } from './routes/trabaja-con-nosotros'
+import { Route as VisionRouteImport } from './routes/vision'
 
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VisionRoute = VisionRouteImport.update({
-  id: '/vision',
-  path: '/vision',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrabajaConNosotrosRoute = TrabajaConNosotrosRouteImport.update({
-  id: '/trabaja-con-nosotros',
-  path: '/trabaja-con-nosotros',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const QuienesSomosRoute = QuienesSomosRouteImport.update({
-  id: '/quienes-somos',
-  path: '/quienes-somos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MisionRoute = MisionRouteImport.update({
-  id: '/mision',
-  path: '/mision',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GraciasRoute = GraciasRouteImport.update({
-  id: '/gracias',
-  path: '/gracias',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FilosofiaRoute = FilosofiaRouteImport.update({
-  id: '/filosofia',
-  path: '/filosofia',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactoRoute = ContactoRouteImport.update({
-  id: '/contacto',
-  path: '/contacto',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoberturaRoute = CoberturaRouteImport.update({
@@ -65,15 +29,44 @@ const CoberturaRoute = CoberturaRouteImport.update({
   path: '/cobertura',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ContactoRoute = ContactoRouteImport.update({
+  id: '/contacto',
+  path: '/contacto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FilosofiaRoute = FilosofiaRouteImport.update({
+  id: '/filosofia',
+  path: '/filosofia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GraciasRoute = GraciasRouteImport.update({
+  id: '/gracias',
+  path: '/gracias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MisionRoute = MisionRouteImport.update({
+  id: '/mision',
+  path: '/mision',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuienesSomosRoute = QuienesSomosRouteImport.update({
+  id: '/quienes-somos',
+  path: '/quienes-somos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrabajaConNosotrosRoute = TrabajaConNosotrosRouteImport.update({
+  id: '/trabaja-con-nosotros',
+  path: '/trabaja-con-nosotros',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VisionRoute = VisionRouteImport.update({
+  id: '/vision',
+  path: '/vision',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/cobertura': typeof CoberturaRoute
   '/contacto': typeof ContactoRoute
   '/filosofia': typeof FilosofiaRoute
@@ -85,7 +78,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/cobertura': typeof CoberturaRoute
   '/contacto': typeof ContactoRoute
   '/filosofia': typeof FilosofiaRoute
@@ -98,7 +90,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/cobertura': typeof CoberturaRoute
   '/contacto': typeof ContactoRoute
   '/filosofia': typeof FilosofiaRoute
@@ -112,7 +103,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/admin'
     | '/cobertura'
     | '/contacto'
     | '/filosofia'
@@ -124,7 +114,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/cobertura'
     | '/contacto'
     | '/filosofia'
@@ -136,7 +125,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/admin'
     | '/cobertura'
     | '/contacto'
     | '/filosofia'
@@ -149,7 +137,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
   CoberturaRoute: typeof CoberturaRoute
   ContactoRoute: typeof ContactoRoute
   FilosofiaRoute: typeof FilosofiaRoute
@@ -162,60 +149,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/vision': {
-      id: '/vision'
-      path: '/vision'
-      fullPath: '/vision'
-      preLoaderRoute: typeof VisionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trabaja-con-nosotros': {
-      id: '/trabaja-con-nosotros'
-      path: '/trabaja-con-nosotros'
-      fullPath: '/trabaja-con-nosotros'
-      preLoaderRoute: typeof TrabajaConNosotrosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/quienes-somos': {
-      id: '/quienes-somos'
-      path: '/quienes-somos'
-      fullPath: '/quienes-somos'
-      preLoaderRoute: typeof QuienesSomosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mision': {
-      id: '/mision'
-      path: '/mision'
-      fullPath: '/mision'
-      preLoaderRoute: typeof MisionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/gracias': {
-      id: '/gracias'
-      path: '/gracias'
-      fullPath: '/gracias'
-      preLoaderRoute: typeof GraciasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/filosofia': {
-      id: '/filosofia'
-      path: '/filosofia'
-      fullPath: '/filosofia'
-      preLoaderRoute: typeof FilosofiaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contacto': {
-      id: '/contacto'
-      path: '/contacto'
-      fullPath: '/contacto'
-      preLoaderRoute: typeof ContactoRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cobertura': {
@@ -225,11 +163,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoberturaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/contacto': {
+      id: '/contacto'
+      path: '/contacto'
+      fullPath: '/contacto'
+      preLoaderRoute: typeof ContactoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/filosofia': {
+      id: '/filosofia'
+      path: '/filosofia'
+      fullPath: '/filosofia'
+      preLoaderRoute: typeof FilosofiaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gracias': {
+      id: '/gracias'
+      path: '/gracias'
+      fullPath: '/gracias'
+      preLoaderRoute: typeof GraciasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mision': {
+      id: '/mision'
+      path: '/mision'
+      fullPath: '/mision'
+      preLoaderRoute: typeof MisionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quienes-somos': {
+      id: '/quienes-somos'
+      path: '/quienes-somos'
+      fullPath: '/quienes-somos'
+      preLoaderRoute: typeof QuienesSomosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trabaja-con-nosotros': {
+      id: '/trabaja-con-nosotros'
+      path: '/trabaja-con-nosotros'
+      fullPath: '/trabaja-con-nosotros'
+      preLoaderRoute: typeof TrabajaConNosotrosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vision': {
+      id: '/vision'
+      path: '/vision'
+      fullPath: '/vision'
+      preLoaderRoute: typeof VisionRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -237,7 +217,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
   CoberturaRoute: CoberturaRoute,
   ContactoRoute: ContactoRoute,
   FilosofiaRoute: FilosofiaRoute,

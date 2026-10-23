@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { Menu, X, Phone, Mail, MapPin, Truck, Facebook, MessageCircle, Lock } from "lucide-react";
+import { Menu, X, Phone, Mail, MapPin, Truck, Facebook, MessageCircle } from "lucide-react";
 import logo from "@/assets/logo.png";
 import Chatbot from "./Chatbot";
 import { useSiteData } from "@/context/SiteDataContext";
@@ -132,9 +132,6 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
         </div>
         <div className="border-t border-white/10 py-4 text-center text-xs text-primary-foreground/60 flex flex-wrap items-center justify-between max-w-7xl mx-auto px-4 gap-2">
           <span>© {new Date().getFullYear()} Logiservicios Mónaco. Todos los derechos reservados.</span>
-          <Link to="/admin" className="text-primary-foreground/40 hover:text-gold transition">
-            Administrar Sitio
-          </Link>
         </div>
       </footer>
 

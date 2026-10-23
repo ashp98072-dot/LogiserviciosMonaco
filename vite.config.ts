@@ -6,22 +6,25 @@ import {defineConfig, type Plugin} from 'vite';
 
 function copySiteDataPlugin(): Plugin {
   const rootFile = path.resolve(__dirname, 'site-data.json');
-  const publicFile = path.resolve(__dirname, 'public/site-data.json');
-  const distFile = path.resolve(__dirname, 'dist/site-data.json');
-
-  const syncSiteData = () => {
-    if (!fs.existsSync(rootFile)) return;
-    fs.mkdirSync(path.dirname(publicFile), { recursive: true });
-    fs.copyFileSync(rootFile, publicFile);
-    if (fs.existsSync(path.dirname(distFile))) {
-      fs.copyFileSync(rootFile, distFile);
-    }
-  };
 
   return {
     name: 'copy-site-data',
-    buildStart: syncSiteData,
-    closeBundle: syncSiteData,
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url?.split('?')[0] !== '/site-data.json') return next();
+        if (req.method !== 'GET' && req.method !== 'HEAD') {
+          res.statusCode = 405;
+          res.setHeader('Allow', 'GET, HEAD');
+          return res.end();
+        }
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-store');
+        res.end(req.method === 'HEAD' ? undefined : fs.readFileSync(rootFile));
+      });
+    },
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'site-data.json', source: fs.readFileSync(rootFile) });
+    },
   };
 }
 
